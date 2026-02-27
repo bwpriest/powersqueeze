@@ -1,0 +1,16 @@
+.DS_Store
+.vscode
+*~
+*#*
+build
+*.pyc
+build
+dist
+*.egg-info
+.vscode/
+__pycache__/
+.ipynb_checkpoints
+*/.ipynb_checkpoints/*
+*~
+*#*
+.DS_Store

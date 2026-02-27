@@ -1,0 +1,85 @@
+// Copyright 2023-2026 Lawrence Livermore National Security, LLC and other
+// powersqueeze Project Developers.See the top-level COPYRIGHT file for details.
+
+#pragma once
+
+#include <type_traits>
+
+namespace psqz::sketch::buffered {
+
+template <typename AdjacencyType, typename SketchContainerType>
+void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
+          SketchContainerType &next_sketch, const int buffer_size_ = 1048576) {
+  using index_type         = typename AdjacencyType::key_type;
+  using adjacency_vec_type = typename AdjacencyType::mapped_type;
+  using adjacency_elt_type = typename adjacency_vec_type::value_type;
+  using weight_type        = typename adjacency_elt_type::second_type;
+  using feature_vec_type   = typename SketchContainerType::mapped_type;
+  using feature_type       = typename feature_vec_type::value_type;
+  static_assert(
+      std::is_same<index_type, typename SketchContainerType::key_type>());
+  static_assert(
+      std::is_same<index_type, typename adjacency_elt_type::first_type>());
+
+  auto next_sketch_ptr = next_sketch.get_ygm_ptr();
+
+  static std::unordered_map<index_type, feature_vec_type> buffer;
+
+  static int buffer_size = buffer_size_;
+  auto       kv_lambda   = [&adjacency, next_sketch_ptr](
+                       const index_type       &col_idx,
+                       const feature_vec_type &col_sketch) {
+    auto csc_visit_lambda = [](const index_type         &col_idx,
+                               const adjacency_vec_type &col_adj,
+                               const feature_vec_type   &col_sketch,
+                               const auto                next_sketch_ptr) {
+      for (const adjacency_elt_type &row : col_adj) {
+        const index_type &row_idx = row.first;
+        auto [itr, inserted]      = buffer.try_emplace(row_idx, col_sketch);
+        if (!inserted) {
+          std::transform(std::begin(itr->second), std::end(itr->second),
+                         std::begin(col_sketch), std::begin(itr->second),
+                         std::plus<feature_type>());
+        }
+      }
+      if (buffer.size() > buffer_size) {
+        for (const auto [row_idx, sum_sketch] : buffer) {
+          next_sketch_ptr->async_visit(
+              row_idx,
+              [](const index_type &row_idx, feature_vec_type &row_sketch,
+                 const feature_vec_type &sum_sketch) {
+                std::transform(std::begin(row_sketch), std::end(row_sketch),
+                               std::begin(sum_sketch), std::begin(row_sketch),
+                               std::plus<feature_type>());
+              },
+              sum_sketch);
+        }
+        buffer.clear();
+      }
+    };
+    adjacency.async_visit(col_idx, csc_visit_lambda, col_sketch,
+                          next_sketch_ptr);
+  };
+
+  current_sketch.for_all(kv_lambda);
+
+  adjacency.comm().barrier();
+
+  for (const auto [row_idx, sum_sketch] : buffer) {
+    next_sketch.async_visit(
+        row_idx,
+        [](const index_type &row_idx, feature_vec_type &row_sketch,
+           const feature_vec_type &sum_sketch) {
+          std::transform(std::begin(row_sketch), std::end(row_sketch),
+                         std::begin(sum_sketch), std::begin(row_sketch),
+                         std::plus<feature_type>());
+        },
+        sum_sketch);
+  }
+
+  adjacency.comm().barrier();
+
+  buffer.clear();
+  adjacency.comm().barrier();
+}
+}  // namespace psqz::sketch::buffered
