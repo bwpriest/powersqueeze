@@ -12,21 +12,18 @@ namespace psqz::graph {
 namespace detail {
 
 template <typename HandlerType, template <typename> class ReaderType>
-struct truth {
-  using handler_type       = HandlerType;
-  using parameters_type    = typename handler_type::parameters_type;
-  using index_type         = typename handler_type::index_type;
-  using index_vec_type     = typename handler_type::index_vec_type;
-  using cmty_type          = typename handler_type::cmty_type;
-  using weight_type        = typename handler_type::weight_type;
-  using adjacency_elt_type = typename handler_type::adjacency_elt_type;
-  using adjacency_vec_type = typename handler_type::adjacency_vec_type;
-  using adjacency_type     = typename handler_type::adjacency_type;
-  using truth_type         = typename handler_type::truth_type;
-  using container_type     = truth_type;
-  using element_type       = cmty_type;
-  using edge_type          = edge<index_type, weight_type>;
-  using reader_type        = ReaderType<edge_type>;
+struct community_streamer {
+  using handler_type    = HandlerType;
+  using parameters_type = typename handler_type::parameters_type;
+  using index_type      = typename handler_type::index_type;
+  using index_vec_type  = typename handler_type::index_vec_type;
+  using cmty_type       = typename handler_type::cmty_type;
+  using weight_type     = typename handler_type::weight_type;
+  using truth_type      = typename handler_type::truth_type;
+  using container_type  = truth_type;
+  using element_type    = cmty_type;
+  using edge_type       = edge<index_type, weight_type>;
+  using reader_type     = ReaderType<edge_type>;
 
  protected:
   handler_type          &_handler;
@@ -34,7 +31,7 @@ struct truth {
   const parameters_type &_params;
 
  public:
-  truth(handler_type &handler)
+  community_streamer(handler_type &handler)
       : _handler(handler), _comm(_handler.comm()), _params(_handler.params()) {}
 
   ygm::comm             &comm() { return _comm; }
@@ -115,23 +112,23 @@ struct queries {
 };
 }  // namespace detail
 
-template <typename HandlerType, template <typename> class TruthFunc>
-struct truth {
+template <typename HandlerType, template <typename> class CmtyStreamerFunc>
+struct truth_streamer {
   using handler_type = HandlerType;
   using truth_type   = typename handler_type::truth_type;
 #if __has_include(<metall/metall.hpp>)
-  using truth_func = psqz::mtl::wrapper<TruthFunc<handler_type>>;
+  using cmty_streamer_func = psqz::mtl::wrapper<CmtyStreamerFunc<handler_type>>;
 #else
-  using truth_func = TruthFunc<handler_type>;
+  using cmty_streamer_func = CmtyStreamerFunc<handler_type>;
 #endif
 
  protected:
-  truth_func _truth_fn;
+  cmty_streamer_func _cmty_streamer_fn;
 
  public:
-  truth(handler_type &handler) : _truth_fn(handler) {}
+  truth_streamer(handler_type &handler) : _cmty_streamer_fn(handler) {}
 
-  truth_type operator()() { return _truth_fn(); }
+  truth_type operator()() { return _cmty_streamer_fn(); }
 };
 
 template <typename HandlerType, template <typename> class QueryFunc>

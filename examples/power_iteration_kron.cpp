@@ -4,6 +4,7 @@
 // comment out if files are 0-indexed.
 #define TSV_DECREMENT
 
+#include <psqz/graph/adjacency.hpp>
 #include <psqz/handler.hpp>
 #include <psqz/kron/graph.hpp>
 #include <psqz/kron/truth.hpp>
@@ -30,13 +31,15 @@ constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 // `power_iteration_kron::operator()` as the body of the main function.
 template <std::size_t RangeSize, std::size_t ReplicationCount>
 struct power_iteration_kron {
+  using adjacency_type =
+      psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
+                                               std::size_t, float>;
   using handler_type =
       psqz::handler<parameters_type, RangeSize, ReplicationCount,
-                    psqz::ygm_array, std::vector, float, std::size_t, float,
-                    std::size_t>;
+                    adjacency_type, float, std::size_t>;
 
-  using adjacency_fn = psqz::kron::adjacency<handler_type>;
-  using truth_fn     = psqz::kron::truth<handler_type>;
+  using adjacency_streamer_fn = psqz::kron::adjacency_streamer<handler_type>;
+  using truth_streamer_fn     = psqz::kron::truth_streamer<handler_type>;
 
   using index_type            = handler_type::index_type;
   using feature_type          = handler_type::feature_type;
@@ -44,7 +47,6 @@ struct power_iteration_kron {
   using cmty_type             = handler_type::cmty_type;
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
-  using adjacency_type        = handler_type::adjacency_type;
   using truth_type            = handler_type::truth_type;
   using sketch_container_type = handler_type::sketch_container_type;
 
@@ -61,26 +63,29 @@ struct power_iteration_kron {
     // challenge data in two tsv files that will be used to create a kronecker
     // product.
     //
-    // `adjacency_fn` is a functor that takes the `handler` and, upon
-    // invocation, returns an `adjacency_type` object, which is a ygm container
-    // with `index_type` keys and `adjacency_vec_type` values. Internally, it
-    // reads from two tsv files listing edges in two SBM graphs. it then forms a
-    // Kronecker product graph, where each potential product edge is included
-    // with probability `intra_probability` if the edge is internal to a product
-    // community, and with probability `inter_probability` otherwise. these
-    // probabilities can be set from the command line. note that if these values
-    // are too small, there can be empty rows/columns in the resulting Kronecker
+    // `adjacency_streamer_fn` is a functor that takes the `handler` and, upon
+    // invocation, returns an `adjacency_type` object, which wraps a ygm
+    // container(s) with `index_type` keys and `adjacency_vec_type` values.
+    //
+    // Internally, it reads from two tsv files listing edges in two SBM graphs.
+    // it then forms a Kronecker product graph, where each potential product
+    // edge is included with probability `intra_probability` if the edge
+    // is internal to a product community, and with probability
+    // `inter_probability` otherwise. these probabilities can be set
+    // from the command line. note that if these values are too small,
+    // there can be empty rows/columns in the resulting Kronecker
     // adjacency matrix.
     //
-    // This is currently a dense representation of the adjacency matrix, so for
-    // very large, very dense, or very skewed degree distribution graphs this
-    // could be a bottleneck in the workflow.
+    // This is currently a dense representation of the adjacency matrix,
+    // so for very large, very dense, or very skewed degree distribution
+    // graphs this could be a bottleneck in the workflow.
     //
     // if you have a different input data type, you need only create a new I/O
-    // wrapped in an `adjacency` class that inherits from
-    // `psqz::graph::adjacency` to use this same workflow, possibly in addition
-    // to a new `parameters` class to handle new parameters of your I/O.
-    adjacency_type adjacency = adjacency_fn{handler}();
+    // wrapped in an `edge_streamer` class that inherits from
+    // `psqz::graph::edge_streamer` to use this same workflow, possibly in
+    // addition to a new `parameters_type` class to handle parameters of your
+    // I/O.
+    adjacency_type adjacency = adjacency_streamer_fn{handler}();
 
     // collect the ground truth
     //
@@ -97,10 +102,11 @@ struct power_iteration_kron {
     // communities for each of the product vertices.
     //
     // if you have a different input data type, you need only create a new I/O
-    // wrapped in a `truth` class that inherits from `psqz::graph::truth` to use
-    // this same workflow, possibly in addition to a new `parameters` class to
-    // hander new parameters of your I/O.
-    truth_type truth = truth_fn{handler}();
+    // wrapped in a `community_streamer` class that inherits from
+    // `psqz::graph::community_streamer` to use this same workflow, possibly in
+    // addition to a new `parameters` class to hander new parameters of your
+    // I/O.
+    truth_type truth = truth_streamer_fn{handler}();
     if (!params.file_directory().empty()) {
       std::filesystem::path path(params.file_directory());
       psqz::create_directory_if_not_exists(path);
