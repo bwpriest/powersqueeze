@@ -8,6 +8,10 @@
 #include <ygm/comm.hpp>
 #include <ygm/utility/timer.hpp>
 
+#include <Eigen/Dense>
+
+#include <krowkee/cereal/eigen.hpp>
+
 #include <iomanip>
 
 namespace psqz {
@@ -28,6 +32,11 @@ class base_handler {
   using adjacency_elt_type = std::pair<index_type, weight_type>;
   using adjacency_vec_type =
       typename adjacency_type::vector_type<adjacency_elt_type>;
+
+  using feature_vec_type = Eigen::Vector<feature_type, Eigen::Dynamic>;
+
+  using sketch_container_type =
+      typename adjacency_type::container_type<index_type, feature_vec_type>;
 
  protected:
   ygm::comm             &_comm;
@@ -104,16 +113,12 @@ class handler
   using base_type =
       detail::base_handler_with_truth<ParametersType, AdjacencyType, TruthType>;
   using parameters_type = typename base_type::parameters_type;
-  using adjacency_type  = typename base_type::adjacency_type;
   using sketch_type     = SketchType;
 
   static_assert(std::is_same<typename base_type::feature_type,
                              typename sketch_type::register_type>::value);
-
-  using feature_vec_type = typename sketch_type::registers_type;
-  using sketch_container_type =
-      typename adjacency_type::container_type<typename base_type::index_type,
-                                              feature_vec_type>;
+  static_assert(std::is_same<typename base_type::feature_vec_type,
+                             typename sketch_type::registers_type>::value);
 
  public:
   handler(ygm::comm &comm, const parameters_type &params)

@@ -14,8 +14,6 @@
 #include <saltatlas/dnnd/dnnd.hpp>
 #include <saltatlas/dnnd/utility.hpp>
 
-#include <krowkee/sketch.hpp>
-
 #include <ygm/detail/collective.hpp>
 
 struct parameters_type : public hdknn::dnnd::parameters<psqz::parameters> {
@@ -75,11 +73,9 @@ struct dnnd_only {
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_map, std::vector,
                                                std::size_t, float>;
-  using sketch_type =
-      krowkee::sketch::SparseJLT<feature_type, 8, 1, std::shared_ptr>;
-  using truth_type   = ygm::container::map<std::size_t, std::size_t>;
-  using handler_type = hdknn::handler<parameters_type, sketch_type,
-                                      adjacency_type, truth_type, float>;
+  using truth_type = ygm::container::map<std::size_t, std::size_t>;
+  using handler_type =
+      hdknn::handler<parameters_type, adjacency_type, truth_type, float>;
 
   using query_fn = psqz::tsv::queries<handler_type>;
 

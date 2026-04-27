@@ -10,13 +10,15 @@
 
 namespace hdknn {
 
-template <typename ParametersType, typename SketchType, typename AdjacencyType,
-          typename TruthType, typename DistType = float>
-class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
-                                     TruthType> {
+template <typename ParametersType, typename AdjacencyType, typename TruthType,
+          typename DistType = float>
+class handler
+    : public psqz::detail::base_handler_with_truth<ParametersType,
+                                                   AdjacencyType, TruthType> {
  public:
   using base_type =
-      psqz::handler<ParametersType, SketchType, AdjacencyType, TruthType>;
+      psqz::detail::base_handler_with_truth<ParametersType, AdjacencyType,
+                                            TruthType>;
 
   using parameters_type = typename base_type::parameters_type;
 
