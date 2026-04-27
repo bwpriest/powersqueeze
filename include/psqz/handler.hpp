@@ -17,16 +17,23 @@
 
 namespace psqz {
 template <typename ParametersType, typename SketchType, typename AdjacencyType,
-          typename CmtyType = std::size_t>
+          typename TruthType>
 class handler {
  public:
   using parameters_type = ParametersType;
-  using cmty_type       = CmtyType;
 
   using sketch_type    = SketchType;
   using adjacency_type = AdjacencyType;
+  using truth_type     = TruthType;
+
+  static_assert(std::is_same<typename adjacency_type::index_type,
+                             typename truth_type::key_type>::value);
+  // static_assert(std::is_same<typename adjacency_type::weight_type,
+  //                            typename sketch_type::register_type>()::value);
 
   using feature_type = typename sketch_type::register_type;
+
+  using cmty_type = truth_type::mapped_type;
 
   using index_type         = typename adjacency_type::index_type;
   using weight_type        = typename adjacency_type::weight_type;
@@ -35,7 +42,6 @@ class handler {
   using adjacency_vec_type =
       typename adjacency_type::vector_type<adjacency_elt_type>;
 
-  using truth_type       = ygm::container::map<index_type, cmty_type>;
   using query_type       = ygm::container::set<index_type>;
   using feature_vec_type = typename sketch_type::registers_type;
   using sketch_container_type =
@@ -90,5 +96,4 @@ class handler {
 
   void reset_timer() { _timer.reset(); }
 };
-
 }  // namespace psqz

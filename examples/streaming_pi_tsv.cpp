@@ -43,6 +43,7 @@ struct streaming_pi_tsv {
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
                                                std::size_t, float>;
+  using truth_type = ygm::container::map<std::size_t, std::size_t>;
   using single_sketch_type =
       krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
                                  std::shared_ptr>;
@@ -54,7 +55,7 @@ struct streaming_pi_tsv {
                                        ReplicationCount, std::shared_ptr,
                                        FinalRangeSize, FinalReplicationCount>;
   using handler_type = psqz::handler<parameters_type, single_sketch_type,
-                                     adjacency_type, std::size_t>;
+                                     adjacency_type, truth_type>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::tsv::truth_streamer<handler_type>;
@@ -64,7 +65,6 @@ struct streaming_pi_tsv {
   using cmty_type             = handler_type::cmty_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
-  using truth_type            = handler_type::truth_type;
   using sketch_container_type = handler_type::sketch_container_type;
 
   using matrix_type = typename double_sketch_type::registers_type;

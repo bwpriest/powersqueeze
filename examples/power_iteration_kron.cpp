@@ -39,8 +39,9 @@ struct power_iteration_kron {
   using sketch_type =
       krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
                                  std::shared_ptr>;
+  using truth_type = ygm::container::map<std::size_t, std::size_t>;
   using handler_type =
-      psqz::handler<parameters_type, sketch_type, adjacency_type, std::size_t>;
+      psqz::handler<parameters_type, sketch_type, adjacency_type, truth_type>;
 
   using adjacency_streamer_fn = psqz::kron::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::kron::truth_streamer<handler_type>;
@@ -50,7 +51,6 @@ struct power_iteration_kron {
   using cmty_type             = handler_type::cmty_type;
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
-  using truth_type            = handler_type::truth_type;
   using sketch_container_type = handler_type::sketch_container_type;
 
   void operator()(ygm::comm &world, const parameters_type &params) const {

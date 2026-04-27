@@ -77,8 +77,9 @@ struct dnnd_only {
                                                std::size_t, float>;
   using sketch_type =
       krowkee::sketch::SparseJLT<feature_type, 8, 1, std::shared_ptr>;
+  using truth_type   = ygm::container::map<std::size_t, std::size_t>;
   using handler_type = hdknn::handler<parameters_type, sketch_type,
-                                      adjacency_type, std::size_t, float>;
+                                      adjacency_type, truth_type, float>;
 
   using query_fn = psqz::tsv::queries<handler_type>;
 
@@ -92,7 +93,6 @@ struct dnnd_only {
   using dist_type             = handler_type::dist_type;
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
-  using truth_type            = handler_type::truth_type;
   using query_type            = handler_type::query_type;
   using sketch_container_type = handler_type::sketch_container_type;
 

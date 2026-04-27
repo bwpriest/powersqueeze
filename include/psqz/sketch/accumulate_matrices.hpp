@@ -25,9 +25,9 @@ std::vector<typename DoubleSketchType::registers_type> accumulate_matrices(
   using feature_vec_type   = typename SketchContainerType::mapped_type;
   using feature_type       = typename feature_vec_type::value_type;
   static_assert(
-      std::is_same<index_type, typename SketchContainerType::key_type>());
+      std::is_same<index_type, typename SketchContainerType::key_type>::value);
   static_assert(
-      std::is_same<index_type, typename adjacency_elt_type::first_type>());
+      std::is_same<index_type, typename adjacency_elt_type::first_type>::value);
 
   using single_sketch_type    = SingleSketchType;
   using single_transform_type = typename single_sketch_type::transform_type;
