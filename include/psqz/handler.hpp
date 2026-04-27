@@ -89,13 +89,6 @@ class handler {
   }
 
   void reset_timer() { _timer.reset(); }
-
-  template <typename Point>
-  static typename adjacency_type::container_type<index_type, Point> spawn(
-      ygm::comm &comm, const Point &dummy, const index_type size) {
-    return psqz::spawn<typename adjacency_type::container_type, index_type,
-                       Point>(comm, dummy, size);
-  }
 };
 
 }  // namespace psqz
