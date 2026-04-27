@@ -28,8 +28,8 @@ class handler {
 
   static_assert(std::is_same<typename adjacency_type::index_type,
                              typename truth_type::key_type>::value);
-  // static_assert(std::is_same<typename adjacency_type::weight_type,
-  //                            typename sketch_type::register_type>()::value);
+  static_assert(std::is_same<typename adjacency_type::weight_type,
+                             typename sketch_type::register_type>::value);
 
   using feature_type = typename sketch_type::register_type;
 
