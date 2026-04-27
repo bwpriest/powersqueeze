@@ -20,19 +20,7 @@ class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
 
   using parameters_type = typename base_type::parameters_type;
 
-  using index_type            = typename base_type::index_type;
-  using feature_type          = typename base_type::feature_type;
-  using index_vec_type        = typename base_type::index_vec_type;
-  using feature_vec_type      = typename base_type::feature_vec_type;
-  using cmty_type             = typename base_type::cmty_type;
-  using weight_type           = typename base_type::weight_type;
-  using adjacency_elt_type    = typename base_type::adjacency_elt_type;
-  using adjacency_vec_type    = typename base_type::adjacency_vec_type;
-  using adjacency_type        = typename base_type::adjacency_type;
-  using truth_type            = typename base_type::truth_type;
-  using sketch_container_type = typename base_type::sketch_container_type;
-  using metrics_type          = typename base_type::metrics_type;
-  using timer_type            = typename base_type::timer_type;
+  using index_type = typename base_type::index_type;
 
   using dist_type         = DistType;
   using neighbor_type     = std::pair<index_type, dist_type>;
