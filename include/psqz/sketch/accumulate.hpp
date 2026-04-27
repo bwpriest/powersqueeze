@@ -18,15 +18,16 @@ void accumulate(AdjacencyType &adjacency, SketchContainerType &SAp1,
   using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
   using weight_type        = typename AdjacencyType::weight_type;
   using feature_vec_type   = typename SketchContainerType::mapped_type;
-  using feature_type       = typename feature_vec_type::value_type;
-  static_assert(
-      std::is_same<index_type, typename SketchContainerType::key_type>());
-  static_assert(
-      std::is_same<index_type, typename adjacency_elt_type::first_type>());
-
   using sketch_type        = SketchType;
   using transform_type     = typename sketch_type::transform_type;
   using transform_ptr_type = typename sketch_type::transform_ptr_type;
+
+  static_assert(
+      std::is_same<index_type, typename SketchContainerType::key_type>::value);
+  static_assert(
+      std::is_same<index_type, typename adjacency_elt_type::first_type>::value);
+  static_assert(std::is_same<feature_vec_type,
+                             typename sketch_type::registers_type>::value);
 
   // For reasons unknown, there has to be seed passed to this
   // constructor or fails stealthily

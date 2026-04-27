@@ -5,17 +5,21 @@
 
 #include <psqz/handler.hpp>
 
+#include <ygm/container/map.hpp>
+#include <ygm/container/set.hpp>
+
 namespace hdknn {
 
 template <typename ParametersType, typename SketchType, typename AdjacencyType,
-          typename CmtyType = std::size_t, typename DistType = float>
+          typename TruthType, typename DistType = float>
 class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
-                                     CmtyType> {
+                                     TruthType> {
  public:
   using base_type =
-      psqz::handler<ParametersType, SketchType, AdjacencyType, CmtyType>;
+      psqz::handler<ParametersType, SketchType, AdjacencyType, TruthType>;
 
-  using parameters_type       = typename base_type::parameters_type;
+  using parameters_type = typename base_type::parameters_type;
+
   using index_type            = typename base_type::index_type;
   using feature_type          = typename base_type::feature_type;
   using index_vec_type        = typename base_type::index_vec_type;
@@ -26,10 +30,7 @@ class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
   using adjacency_vec_type    = typename base_type::adjacency_vec_type;
   using adjacency_type        = typename base_type::adjacency_type;
   using truth_type            = typename base_type::truth_type;
-  using query_type            = typename base_type::query_type;
   using sketch_container_type = typename base_type::sketch_container_type;
-  using degree_type           = typename base_type::degree_type;
-  using degree_container_type = typename base_type::degree_container_type;
   using metrics_type          = typename base_type::metrics_type;
   using timer_type            = typename base_type::timer_type;
 
@@ -38,6 +39,7 @@ class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
   using neighborhood_type = std::vector<neighbor_type>;
   using neighborhood_container_type =
       ygm::container::map<index_type, neighborhood_type>;
+  using query_type = ygm::container::set<index_type>;
 
  public:
   handler(ygm::comm &comm, const parameters_type &params)

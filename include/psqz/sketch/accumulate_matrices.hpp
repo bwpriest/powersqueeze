@@ -62,6 +62,16 @@ std::vector<typename DoubleSketchType::registers_type> accumulate_matrices(
       std::is_same<
           typename double_transform_type::col_transform_ptr_type,
           typename final_double_transform_type::row_transform_ptr_type>::value);
+  static_assert(
+      std::is_same<index_type, typename SketchContainerType::key_type>::value);
+  static_assert(
+      std::is_same<index_type, typename adjacency_elt_type::first_type>::value);
+  static_assert(
+      std::is_same<feature_vec_type,
+                   typename single_sketch_type::registers_type>::value);
+  static_assert(
+      std::is_same<typename double_sketch_type::registers_type,
+                   typename final_double_sketch_type::registers_type>::value);
 
   YGM_ASSERT_RELEASE(transform_count > 0 && transform_count < 10);
 

@@ -16,12 +16,8 @@ struct community_streamer {
   using handler_type    = HandlerType;
   using parameters_type = typename handler_type::parameters_type;
   using index_type      = typename handler_type::index_type;
-  using index_vec_type  = typename handler_type::index_vec_type;
-  using cmty_type       = typename handler_type::cmty_type;
   using weight_type     = typename handler_type::weight_type;
   using truth_type      = typename handler_type::truth_type;
-  using container_type  = truth_type;
-  using element_type    = cmty_type;
   using edge_type       = edge<index_type, weight_type>;
   using reader_type     = ReaderType<edge_type>;
 
@@ -69,10 +65,7 @@ struct queries {
   using parameters_type = typename handler_type::parameters_type;
   using query_type      = typename handler_type::query_type;
   using index_type      = typename handler_type::index_type;
-  using cmty_type       = typename handler_type::cmty_type;
   using weight_type     = typename handler_type::weight_type;
-  using container_type  = query_type;
-  using element_type    = cmty_type;
   using edge_type       = edge<index_type, weight_type>;
   using reader_type     = ReaderType<edge_type>;
 
