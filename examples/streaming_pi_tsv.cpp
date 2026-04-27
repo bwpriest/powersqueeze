@@ -54,8 +54,9 @@ struct streaming_pi_tsv {
       krowkee::sketch::DoubleSparseJLT<feature_type, RangeSize,
                                        ReplicationCount, std::shared_ptr,
                                        FinalRangeSize, FinalReplicationCount>;
-  using handler_type = psqz::handler<parameters_type, single_sketch_type,
-                                     adjacency_type, truth_type>;
+  using handler_type =
+      psqz::handler_with_truth<single_sketch_type, parameters_type,
+                               adjacency_type, truth_type>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::tsv::truth_streamer<handler_type>;

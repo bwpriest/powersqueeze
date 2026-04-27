@@ -182,8 +182,8 @@ struct power_iteration_tsv {
   using sketch_type =
       krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
                                  std::shared_ptr>;
-  using handler_type =
-      psqz::handler<parameters_type, sketch_type, adjacency_type, truth_type>;
+  using handler_type = psqz::handler_with_truth<sketch_type, parameters_type,
+                                                adjacency_type, truth_type>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_fn              = wdc::truth<handler_type>;

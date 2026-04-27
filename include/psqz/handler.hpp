@@ -102,16 +102,11 @@ class base_handler_with_truth
   base_handler_with_truth(ygm::comm &comm, const parameters_type &params)
       : base_type(comm, params) {}
 };
-}  // namespace detail
 
-template <typename ParametersType, typename SketchType, typename AdjacencyType,
-          typename TruthType>
-class handler
-    : public detail::base_handler_with_truth<ParametersType, AdjacencyType,
-                                             TruthType> {
+template <typename SketchType, typename BaseType>
+class base_sketch_handler : public BaseType {
  public:
-  using base_type =
-      detail::base_handler_with_truth<ParametersType, AdjacencyType, TruthType>;
+  using base_type       = BaseType;
   using parameters_type = typename base_type::parameters_type;
   using sketch_type     = SketchType;
 
@@ -121,7 +116,14 @@ class handler
                              typename sketch_type::registers_type>::value);
 
  public:
-  handler(ygm::comm &comm, const parameters_type &params)
+  base_sketch_handler(ygm::comm &comm, const parameters_type &params)
       : base_type(comm, params) {}
 };
+}  // namespace detail
+
+template <typename SketchType, typename ParametersType, typename AdjacencyType,
+          typename TruthType>
+using handler_with_truth = detail::base_sketch_handler<
+    SketchType,
+    detail::base_handler_with_truth<ParametersType, AdjacencyType, TruthType>>;
 }  // namespace psqz
