@@ -75,7 +75,8 @@ struct dnnd_only {
                                                std::size_t, float>;
   using truth_type = ygm::container::map<std::size_t, std::size_t>;
   using handler_type =
-      hdknn::handler<parameters_type, adjacency_type, truth_type, float>;
+      hdknn::handler_with_truth<parameters_type, adjacency_type, truth_type,
+                                float>;
 
   using query_fn = psqz::tsv::queries<handler_type>;
 

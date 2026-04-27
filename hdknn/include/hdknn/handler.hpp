@@ -10,15 +10,12 @@
 
 namespace hdknn {
 
-template <typename ParametersType, typename AdjacencyType, typename TruthType,
-          typename DistType = float>
-class handler
-    : public psqz::detail::base_handler_with_truth<ParametersType,
-                                                   AdjacencyType, TruthType> {
+namespace detail {
+
+template <typename BaseType, typename DistType>
+class base_knn_handler : public BaseType {
  public:
-  using base_type =
-      psqz::detail::base_handler_with_truth<ParametersType, AdjacencyType,
-                                            TruthType>;
+  using base_type = BaseType;
 
   using parameters_type = typename base_type::parameters_type;
 
@@ -31,9 +28,16 @@ class handler
       ygm::container::map<index_type, neighborhood_type>;
   using query_type = ygm::container::set<index_type>;
 
- public:
-  handler(ygm::comm &comm, const parameters_type &params)
+  base_knn_handler(ygm::comm &comm, const parameters_type &params)
       : base_type(comm, params) {}
 };
+}  // namespace detail
+
+template <typename ParametersType, typename AdjacencyType, typename TruthType,
+          typename DistType = float>
+using handler_with_truth =
+    detail::base_knn_handler<psqz::detail::base_handler_with_truth<
+                                 ParametersType, AdjacencyType, TruthType>,
+                             DistType>;
 
 }  // namespace hdknn

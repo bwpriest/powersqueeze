@@ -72,7 +72,8 @@ struct dhnsw_only {
                                                std::size_t, float>;
   using truth_type = ygm::container::map<std::size_t, std::size_t>;
   using handler_type =
-      hdknn::handler<parameters_type, adjacency_type, truth_type, float>;
+      hdknn::handler_with_truth<parameters_type, adjacency_type, truth_type,
+                                float>;
 
   using precision_fn    = hdknn::metric::precision<handler_type>;
   using recall_fn       = hdknn::metric::recall<handler_type>;
