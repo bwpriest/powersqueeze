@@ -10,6 +10,7 @@
 #include <psqz/tsv/truth.hpp>
 #include <psqz/utils/writer.hpp>
 
+#include <krowkee/sketch.hpp>
 #include <krowkee/util/runtime.hpp>
 
 #include <common.hpp>
@@ -173,18 +174,20 @@ constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 // `power_iteration_tsv::operator()` as the body of the main function.
 template <std::size_t RangeSize, std::size_t ReplicationCount>
 struct power_iteration_tsv {
+  using feature_type = float;
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
                                                std::size_t, float>;
+  using sketch_type =
+      krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
+                                 std::shared_ptr>;
   using handler_type =
-      psqz::handler<parameters_type, RangeSize, ReplicationCount,
-                    adjacency_type, float, std::size_t>;
+      psqz::handler<parameters_type, sketch_type, adjacency_type, std::size_t>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_fn              = wdc::truth<handler_type>;
 
   using index_type            = handler_type::index_type;
-  using feature_type          = handler_type::feature_type;
   using feature_vec_type      = handler_type::feature_vec_type;
   using cmty_type             = handler_type::cmty_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
@@ -252,11 +255,11 @@ struct power_iteration_tsv {
     // populate the array with zeros upon creation to eliminate memory
     // reallocation during the accumulation.
     feature_vec_type dummy(
-        feature_vec_type::Zero(handler_type::register_count));
+        feature_vec_type::Zero(sketch_type::transform_type::size()));
 
     sketch_container_type this_sketch(world, params.vertex_count(), dummy);
-    psqz::sketch::accumulate<RangeSize, ReplicationCount>(
-        adjacency, this_sketch, params.random_seed());
+    psqz::sketch::accumulate<sketch_type>(adjacency, this_sketch,
+                                          params.random_seed());
     sketch_accounting(handler, this_sketch, params, 1);
 
     // Here we perform iterative sparse matrix-multivector multiplications to

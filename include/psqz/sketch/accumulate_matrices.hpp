@@ -12,14 +12,12 @@
 #include <type_traits>
 
 namespace psqz::sketch {
-template <std::size_t RangeSize, std::size_t ReplicationCount,
-          typename MatrixType, typename AdjacencyType,
-          typename SketchContainerType, std::size_t FinalRangeSize = RangeSize,
-          std::size_t FinalReplicationCount = ReplicationCount>
-std::vector<MatrixType> accumulate_matrices(AdjacencyType       &adjacency,
-                                            SketchContainerType &SAp1,
-                                            const std::uint64_t &random_seed,
-                                            const int transform_count) {
+template <typename AdjacencyType, typename SketchContainerType,
+          typename SingleSketchType, typename DoubleSketchType,
+          typename FinalDoubleSketchType = DoubleSketchType>
+std::vector<typename DoubleSketchType::registers_type> accumulate_matrices(
+    AdjacencyType &adjacency, SketchContainerType &SAp1,
+    const std::uint64_t &random_seed, const int transform_count) {
   using index_type         = typename AdjacencyType::index_type;
   using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
   using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
@@ -31,24 +29,17 @@ std::vector<MatrixType> accumulate_matrices(AdjacencyType       &adjacency,
   static_assert(
       std::is_same<index_type, typename adjacency_elt_type::first_type>());
 
-  using single_sketch_type =
-      krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
-                                 std::shared_ptr>;
+  using single_sketch_type    = SingleSketchType;
   using single_transform_type = typename single_sketch_type::transform_type;
   using single_transform_ptr_type =
       typename single_sketch_type::transform_ptr_type;
 
-  using double_sketch_type =
-      krowkee::sketch::DoubleSparseJLT<feature_type, RangeSize,
-                                       ReplicationCount, std::shared_ptr>;
+  using double_sketch_type    = DoubleSketchType;
   using double_transform_type = typename double_sketch_type::transform_type;
   using double_transform_ptr_type =
       typename double_sketch_type::transform_ptr_type;
 
-  using final_double_sketch_type =
-      krowkee::sketch::DoubleSparseJLT<feature_type, RangeSize,
-                                       ReplicationCount, std::shared_ptr,
-                                       FinalRangeSize, FinalReplicationCount>;
+  using final_double_sketch_type = FinalDoubleSketchType;
   using final_double_transform_type =
       typename final_double_sketch_type::transform_type;
   using final_double_transform_ptr_type =
@@ -58,17 +49,19 @@ std::vector<MatrixType> accumulate_matrices(AdjacencyType       &adjacency,
   using final_single_transform_ptr_type =
       typename final_double_transform_type::col_transform_ptr_type;
 
-  static_assert(
-      std::is_same<single_transform_type,
-                   typename double_transform_type::row_transform_type>::value);
-  static_assert(
-      std::is_same<single_transform_type,
-                   typename double_transform_type::col_transform_type>::value);
+  using matrix_type = typename double_sketch_type::registers_type;
 
+  static_assert(std::is_same<
+                single_transform_ptr_type,
+                typename double_transform_type::row_transform_ptr_type>::value);
+  // might need to revisit this in rectangular case.
+  static_assert(std::is_same<
+                single_transform_ptr_type,
+                typename double_transform_type::col_transform_ptr_type>::value);
   static_assert(
       std::is_same<
-          typename double_transform_type::col_transform_type,
-          typename final_double_transform_type::row_transform_type>::value);
+          typename double_transform_type::col_transform_ptr_type,
+          typename final_double_transform_type::row_transform_ptr_type>::value);
 
   YGM_ASSERT_RELEASE(transform_count > 0 && transform_count < 10);
 
@@ -135,18 +128,18 @@ std::vector<MatrixType> accumulate_matrices(AdjacencyType       &adjacency,
   comm.barrier();
 
   // We create the parallel two-sided matrices
-  std::vector<MatrixType> double_matrices;
+  std::vector<matrix_type> double_matrices;
 
   // We dump the contents of the S^tAR embeddings to Eigen matrices. Each rank
   // will hold their local updates, and then we allreduce the matrices so that
   // each rank holds the fully sketched matrices.
   for (int i(0); i < double_sketches.size(); ++i) {
     // using a const reference to avoid an extra copy
-    const MatrixType &double_matrix =
+    const matrix_type &double_matrix =
         double_sketches[i].container().registers();
     // it is very important that the dummy matrix have the the correct shapes!
     double_matrices.push_back(
-        MatrixType::Zero(double_matrix.rows(), double_matrix.cols()));
+        matrix_type::Zero(double_matrix.rows(), double_matrix.cols()));
     YGM_ASSERT_MPI(MPI_Allreduce(
         double_matrix.data(), double_matrices[i].data(),
         double_matrix.rows() * double_matrix.cols(),
@@ -155,10 +148,10 @@ std::vector<MatrixType> accumulate_matrices(AdjacencyType       &adjacency,
     double_matrices[i] /= double_transform_type::scaling_factor;
   }
   // repeat for final matrix
-  const MatrixType &final_double_matrix =
+  const matrix_type &final_double_matrix =
       final_double_sketch.container().registers();
-  double_matrices.push_back(
-      MatrixType::Zero(final_double_matrix.rows(), final_double_matrix.cols()));
+  double_matrices.push_back(matrix_type::Zero(final_double_matrix.rows(),
+                                              final_double_matrix.cols()));
   YGM_ASSERT_MPI(MPI_Allreduce(
       final_double_matrix.data(), double_matrices.back().data(),
       final_double_matrix.rows() * final_double_matrix.cols(),

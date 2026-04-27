@@ -7,16 +7,13 @@
 
 namespace hdknn {
 
-template <typename ParametersType, std::size_t RangeSize,
-          std::size_t ReplicationCount, typename AdjacencyType,
-          typename FeatureType = float, typename CmtyType = std::size_t,
-          typename DistType = float>
-class handler
-    : public psqz::handler<ParametersType, RangeSize, ReplicationCount,
-                           AdjacencyType, FeatureType, CmtyType> {
+template <typename ParametersType, typename SketchType, typename AdjacencyType,
+          typename CmtyType = std::size_t, typename DistType = float>
+class handler : public psqz::handler<ParametersType, SketchType, AdjacencyType,
+                                     CmtyType> {
  public:
-  using base_type = psqz::handler<ParametersType, RangeSize, ReplicationCount,
-                                  AdjacencyType, FeatureType, CmtyType>;
+  using base_type =
+      psqz::handler<ParametersType, SketchType, AdjacencyType, CmtyType>;
 
   using parameters_type       = typename base_type::parameters_type;
   using index_type            = typename base_type::index_type;

@@ -14,6 +14,8 @@
 #include <saltatlas/dnnd/dnnd.hpp>
 #include <saltatlas/dnnd/utility.hpp>
 
+#include <krowkee/sketch.hpp>
+
 #include <ygm/detail/collective.hpp>
 
 struct parameters_type : public hdknn::dnnd::parameters<psqz::parameters> {
@@ -69,11 +71,14 @@ struct parameters_type : public hdknn::dnnd::parameters<psqz::parameters> {
 constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 
 struct dnnd_only {
+  using feature_type = float;
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_map, std::vector,
                                                std::size_t, float>;
-  using handler_type = hdknn::handler<parameters_type, 8, 1, adjacency_type,
-                                      float, std::size_t, float>;
+  using sketch_type =
+      krowkee::sketch::SparseJLT<feature_type, 8, 1, std::shared_ptr>;
+  using handler_type = hdknn::handler<parameters_type, sketch_type,
+                                      adjacency_type, std::size_t, float>;
 
   using query_fn = psqz::tsv::queries<handler_type>;
 
@@ -82,7 +87,6 @@ struct dnnd_only {
   using search_depth_fn = hdknn::metric::search_depth<handler_type>;
 
   using index_type            = handler_type::index_type;
-  using feature_type          = handler_type::feature_type;
   using feature_vec_type      = handler_type::feature_vec_type;
   using cmty_type             = handler_type::cmty_type;
   using dist_type             = handler_type::dist_type;

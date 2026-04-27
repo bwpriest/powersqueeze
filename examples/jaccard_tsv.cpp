@@ -13,6 +13,7 @@
 #include <psqz/tsv/truth.hpp>
 #include <psqz/utils/writer.hpp>
 
+#include <krowkee/sketch.hpp>
 #include <krowkee/util/runtime.hpp>
 
 #include <common.hpp>
@@ -68,19 +69,21 @@ inline distance_type approx_jaccard_index(const point_type &p0,
 // `jaccard_dnnd_kron::operator()` as the body of the main function.
 template <std::size_t RangeSize, std::size_t ReplicationCount>
 struct jaccard_tsv {
+  using feature_type = float;
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
                                                std::size_t, float>;
+  using sketch_type =
+      krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
+                                 std::shared_ptr>;
   using handler_type =
-      psqz::handler<parameters_type, RangeSize, ReplicationCount,
-                    adjacency_type, float, std::size_t>;
+      psqz::handler<parameters_type, sketch_type, adjacency_type, std::size_t>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::tsv::truth_streamer<handler_type>;
   using query_fn              = psqz::tsv::queries<handler_type>;
 
   using index_type            = handler_type::index_type;
-  using feature_type          = handler_type::feature_type;
   using feature_vec_type      = handler_type::feature_vec_type;
   using cmty_type             = handler_type::cmty_type;
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
@@ -135,11 +138,11 @@ struct jaccard_tsv {
     // the truncated, power-iteration-embedded vectors that can be used in
     // downstream metric applications.
     feature_vec_type dummy(
-        feature_vec_type::Zero(handler_type::register_count));
+        feature_vec_type::Zero(sketch_type::transform_type::size()));
 
     sketch_container_type SAp1(world, params.vertex_count(), dummy);
-    psqz::sketch::accumulate<RangeSize, ReplicationCount>(adjacency, SAp1,
-                                                          params.random_seed());
+    psqz::sketch::accumulate<sketch_type>(adjacency, SAp1,
+                                          params.random_seed());
     handler.chirp_metric("SAp1 accumulate time");
 
     // This is an ad-hoc solution where we append the size to the end of each
@@ -150,8 +153,8 @@ struct jaccard_tsv {
               idx,
               [](const index_type &idx, feature_vec_type &sketch,
                  const feature_type &size) {
-                sketch.resize(handler_type::register_count + 1);
-                sketch(handler_type::register_count) = size;
+                sketch.resize(sketch_type::transform_type::size() + 1);
+                sketch(sketch_type::transform_type::size()) = size;
               },
               adj_vec.size());
         });

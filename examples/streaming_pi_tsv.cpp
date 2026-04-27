@@ -15,6 +15,7 @@
 
 #include <psqz/sketch/chebyshev.hpp>
 
+#include <krowkee/sketch.hpp>
 #include <krowkee/util/runtime.hpp>
 
 #include <common.hpp>
@@ -38,18 +39,27 @@ template <std::size_t RangeSize, std::size_t ReplicationCount,
           std::size_t FinalRangeSize        = RangeSize,
           std::size_t FinalReplicationCount = ReplicationCount>
 struct streaming_pi_tsv {
+  using feature_type = float;
   using adjacency_type =
       psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
                                                std::size_t, float>;
-  using handler_type =
-      psqz::handler<parameters_type, RangeSize, ReplicationCount,
-                    adjacency_type, float, std::size_t>;
+  using single_sketch_type =
+      krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
+                                 std::shared_ptr>;
+  using double_sketch_type =
+      krowkee::sketch::DoubleSparseJLT<feature_type, RangeSize,
+                                       ReplicationCount, std::shared_ptr>;
+  using final_double_sketch_type =
+      krowkee::sketch::DoubleSparseJLT<feature_type, RangeSize,
+                                       ReplicationCount, std::shared_ptr,
+                                       FinalRangeSize, FinalReplicationCount>;
+  using handler_type = psqz::handler<parameters_type, single_sketch_type,
+                                     adjacency_type, std::size_t>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::tsv::truth_streamer<handler_type>;
 
   using index_type            = handler_type::index_type;
-  using feature_type          = handler_type::feature_type;
   using feature_vec_type      = handler_type::feature_vec_type;
   using cmty_type             = handler_type::cmty_type;
   using adjacency_vec_type    = handler_type::adjacency_vec_type;
@@ -57,9 +67,8 @@ struct streaming_pi_tsv {
   using truth_type            = handler_type::truth_type;
   using sketch_container_type = handler_type::sketch_container_type;
 
-  using matrix_type =
-      Eigen::Matrix<feature_type, Eigen::Dynamic, Eigen::Dynamic>;
-  using vector_type = Eigen::Vector<feature_type, Eigen::Dynamic>;
+  using matrix_type = typename double_sketch_type::registers_type;
+  using vector_type = single_sketch_type::registers_type;
   using vector_container_type =
       typename adjacency_type::container_type<index_type, vector_type>;
 
@@ -126,16 +135,16 @@ struct streaming_pi_tsv {
     // reallocation during the accumulation.
 
     feature_vec_type dummy(
-        feature_vec_type::Zero(handler_type::register_count));
+        feature_vec_type::Zero(single_sketch_type::transform_type::size()));
 
     sketch_container_type this_sketch(world, params.vertex_count(), dummy);
-    psqz::sketch::accumulate<RangeSize, ReplicationCount>(
-        adjacency, this_sketch, params.random_seed());
+    psqz::sketch::accumulate<single_sketch_type>(adjacency, this_sketch,
+                                                 params.random_seed());
     sketch_accounting(handler, this_sketch, params, 1, false);
 
     std::vector<matrix_type> matrices = psqz::sketch::accumulate_matrices<
-        RangeSize, ReplicationCount, matrix_type, adjacency_type,
-        sketch_container_type, FinalRangeSize, FinalReplicationCount>(
+        adjacency_type, sketch_container_type, single_sketch_type,
+        double_sketch_type, final_double_sketch_type>(
         adjacency, this_sketch, params.random_seed(), params.exponent());
 
     // Here we perform the in-place matrix multiplications to compute streaming

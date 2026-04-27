@@ -9,8 +9,8 @@
 
 namespace psqz::sketch {
 
-template <std::size_t RangeSize, std::size_t ReplicationCount,
-          typename AdjacencyType, typename SketchContainerType>
+template <typename SketchType, typename AdjacencyType,
+          typename SketchContainerType>
 void accumulate(AdjacencyType &adjacency, SketchContainerType &SAp1,
                 const std::uint64_t &random_seed) {
   using index_type         = typename AdjacencyType::index_type;
@@ -24,9 +24,7 @@ void accumulate(AdjacencyType &adjacency, SketchContainerType &SAp1,
   static_assert(
       std::is_same<index_type, typename adjacency_elt_type::first_type>());
 
-  using sketch_type =
-      krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
-                                 std::shared_ptr>;
+  using sketch_type        = SketchType;
   using transform_type     = typename sketch_type::transform_type;
   using transform_ptr_type = typename sketch_type::transform_ptr_type;
 

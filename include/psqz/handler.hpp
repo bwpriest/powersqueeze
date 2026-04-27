@@ -16,16 +16,17 @@
 #include <iomanip>
 
 namespace psqz {
-template <typename ParametersType, std::size_t RangeSize,
-          std::size_t ReplicationCount, typename AdjacencyType,
-          typename FeatureType = float, typename CmtyType = std::size_t>
+template <typename ParametersType, typename SketchType, typename AdjacencyType,
+          typename CmtyType = std::size_t>
 class handler {
  public:
   using parameters_type = ParametersType;
-  using feature_type    = FeatureType;
   using cmty_type       = CmtyType;
 
+  using sketch_type    = SketchType;
   using adjacency_type = AdjacencyType;
+
+  using feature_type = typename sketch_type::register_type;
 
   using index_type         = typename adjacency_type::index_type;
   using weight_type        = typename adjacency_type::weight_type;
@@ -34,20 +35,16 @@ class handler {
   using adjacency_vec_type =
       typename adjacency_type::vector_type<adjacency_elt_type>;
 
-  using truth_type            = ygm::container::map<index_type, cmty_type>;
-  using query_type            = ygm::container::set<index_type>;
-  using sketch_container_type = typename adjacency_type::container_type<
-      index_type, Eigen::Vector<feature_type, Eigen::Dynamic>>;
-  using feature_vec_type = typename sketch_container_type::mapped_type;
-  using degree_type      = float;
+  using truth_type       = ygm::container::map<index_type, cmty_type>;
+  using query_type       = ygm::container::set<index_type>;
+  using feature_vec_type = typename sketch_type::registers_type;
+  using sketch_container_type =
+      typename adjacency_type::container_type<index_type, feature_vec_type>;
+  using degree_type = float;
   using degree_container_type =
       typename adjacency_type::container_type<index_type, degree_type>;
   using metrics_type = Metrics;
   using timer_type   = ygm::utility::timer;
-
-  static constexpr std::size_t range_size        = RangeSize;
-  static constexpr std::size_t replication_count = ReplicationCount;
-  static constexpr std::size_t register_count = range_size * replication_count;
 
  protected:
   ygm::comm             &_comm;
