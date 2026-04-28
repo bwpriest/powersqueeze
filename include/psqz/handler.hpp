@@ -78,30 +78,21 @@ struct base_truth_handler {
   using cmty_type  = truth_type::mapped_type;
 };
 
-template <typename SketchType>
-struct base_sketch_handler {
-  using sketch_type = SketchType;
-};
-
 template <typename TruthHandlerType, typename OptionsType>
 struct base_truth_handler_checker {
   static_assert(
       std::is_same<typename OptionsType::index_type,
                    typename TruthHandlerType::truth_type::key_type>::value);
-  static_assert(
-      std::is_same<typename OptionsType::index_type,
-                   typename TruthHandlerType::truth_type::mapped_type>::value);
+  static_assert(std::is_same<typename OptionsType::index_type,
+                             typename TruthHandlerType::cmty_type>::value);
 };
 
-template <typename SketchHandlerType, typename OptionsType>
+template <typename SketchType, typename OptionsType>
 struct base_sketch_handler_checker {
-  static_assert(std::is_same<
-                typename OptionsType::feature_type,
-                typename SketchHandlerType::sketch_type::register_type>::value);
-  static_assert(
-      std::is_same<
-          typename OptionsType::feature_vec_type,
-          typename SketchHandlerType::sketch_type::registers_type>::value);
+  static_assert(std::is_same<typename OptionsType::feature_type,
+                             typename SketchType::register_type>::value);
+  static_assert(std::is_same<typename OptionsType::feature_vec_type,
+                             typename SketchType::registers_type>::value);
 };
 
 }  // namespace detail
@@ -111,12 +102,13 @@ template <typename OptionsType, typename SketchType, typename ParametersType,
 class handler_with_truth
     : public detail::base_handler<ParametersType>,
       public OptionsType,
-      public detail::base_sketch_handler<SketchType>,
       public detail::base_adjacency_handler<AdjacencyType<OptionsType>>,
       public detail::base_truth_handler<TruthType> {
-  detail::base_sketch_handler_checker<detail::base_sketch_handler<SketchType>,
-                                      OptionsType>
-      sketch_checker;
+ public:
+  using sketch_type = SketchType;
+
+ private:
+  detail::base_sketch_handler_checker<sketch_type, OptionsType> sketch_checker;
   detail::base_truth_handler_checker<detail::base_truth_handler<TruthType>,
                                      OptionsType>
       truth_checker;
