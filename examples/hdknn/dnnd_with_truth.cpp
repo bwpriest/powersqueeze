@@ -262,7 +262,7 @@ struct dnnd_only {
             neighborhood);
       }
       world.barrier();
-      handler.chirp_metric("neighborhood collect time");
+      handler.chirp_metric("neighborhood relocalize time");
 
       // at long last, dump neighborhoods to file.
       saltatlas::utility::gather_and_dump_neighbors(
