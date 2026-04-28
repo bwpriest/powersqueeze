@@ -8,9 +8,9 @@ namespace psqz::sketch {
 template <typename SketchContainerType>
 void chebyshev_p2(SketchContainerType &SAp1, SketchContainerType &SAp2,
                   SketchContainerType &polynomial) {
-  using index_type       = typename SketchContainerType::key_type;
-  using feature_vec_type = typename SketchContainerType::mapped_type;
-  using feature_type     = typename feature_vec_type::value_type;
+  using index_type       = SketchContainerType::key_type;
+  using feature_vec_type = SketchContainerType::mapped_type;
+  using feature_type     = feature_vec_type::value_type;
 
   auto add_lambda = [](const index_type &idx, feature_vec_type &sketch,
                        const feature_vec_type &incoming) {
@@ -47,9 +47,9 @@ void chebyshev_p2(SketchContainerType &SAp1, SketchContainerType &SAp2,
 template <typename SketchContainerType>
 void chebyshev_p3(SketchContainerType &SAp1, SketchContainerType &SAp2,
                   SketchContainerType &SAp3, SketchContainerType &polynomial) {
-  using index_type       = typename SketchContainerType::key_type;
-  using feature_vec_type = typename SketchContainerType::mapped_type;
-  using feature_type     = typename feature_vec_type::value_type;
+  using index_type       = SketchContainerType::key_type;
+  using feature_vec_type = SketchContainerType::mapped_type;
+  using feature_type     = feature_vec_type::value_type;
 
   auto add_lambda = [](const index_type &idx, feature_vec_type &sketch,
                        const feature_vec_type &incoming) {
@@ -94,9 +94,9 @@ template <typename SketchContainerType>
 void chebyshev_p4(SketchContainerType &SAp1, SketchContainerType &SAp2,
                   SketchContainerType &SAp3, SketchContainerType &SAp4,
                   SketchContainerType &polynomial) {
-  using index_type       = typename SketchContainerType::key_type;
-  using feature_vec_type = typename SketchContainerType::mapped_type;
-  using feature_type     = typename feature_vec_type::value_type;
+  using index_type       = SketchContainerType::key_type;
+  using feature_vec_type = SketchContainerType::mapped_type;
+  using feature_type     = feature_vec_type::value_type;
 
   auto add_lambda = [](const index_type &idx, feature_vec_type &sketch,
                        const feature_vec_type &incoming) {

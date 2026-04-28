@@ -47,7 +47,7 @@ class handler_with_truth
 
  public:
   using base_type       = psqz::detail::base_handler<ParametersType>;
-  using parameters_type = typename base_type::parameters_type;
+  using parameters_type = base_type::parameters_type;
   handler_with_truth(ygm::comm &comm, const parameters_type &params)
       : base_type(comm, params) {}
 };

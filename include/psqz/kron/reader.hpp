@@ -34,8 +34,8 @@ void check_probability(const std::string &name, const float probability) {
 template <typename EdgeType>
 struct gc_graph {
   using edge_type          = EdgeType;
-  using index_type         = typename edge_type::index_type;
-  using weight_type        = typename edge_type::weight_type;
+  using index_type         = edge_type::index_type;
+  using weight_type        = edge_type::weight_type;
   using community_type     = index_type;
   using weighted_edge_type = std::tuple<index_type, index_type, weight_type>;
   using edges_type         = std::vector<weighted_edge_type>;
@@ -343,11 +343,11 @@ struct reader {
 
   using edge_type          = EdgeType;
   using graph_type         = gc_graph<edge_type>;
-  using index_type         = typename graph_type::index_type;
-  using weight_type        = typename graph_type::weight_type;
-  using community_type     = typename graph_type::community_type;
-  using weighted_edge_type = typename graph_type::weighted_edge_type;
-  using truth_type         = typename graph_type::truth_type;
+  using index_type         = graph_type::index_type;
+  using weight_type        = graph_type::weight_type;
+  using community_type     = graph_type::community_type;
+  using weighted_edge_type = graph_type::weighted_edge_type;
+  using truth_type         = graph_type::truth_type;
 
   enum class mode_type : std::uint8_t { index, query, truth };
 

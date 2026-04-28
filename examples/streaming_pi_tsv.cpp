@@ -70,7 +70,7 @@ struct streaming_pi_tsv {
   using adjacency_elt_type    = handler_type::adjacency_elt_type;
   using sketch_container_type = handler_type::sketch_container_type;
 
-  using matrix_type = typename double_sketch_type::registers_type;
+  using matrix_type = double_sketch_type::registers_type;
   using vector_type = single_sketch_type::registers_type;
   using vector_container_type =
       typename adjacency_type::container_type<index_type, vector_type>;

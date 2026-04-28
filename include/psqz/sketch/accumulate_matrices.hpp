@@ -18,38 +18,35 @@ template <typename AdjacencyType, typename SketchContainerType,
 std::vector<typename DoubleSketchType::registers_type> accumulate_matrices(
     AdjacencyType &adjacency, SketchContainerType &SAp1,
     const std::uint64_t &random_seed, const int transform_count) {
-  using index_type         = typename AdjacencyType::index_type;
-  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
-  using weight_type        = typename AdjacencyType::weight_type;
-  using feature_vec_type   = typename SketchContainerType::mapped_type;
-  using feature_type       = typename feature_vec_type::value_type;
+  using index_type         = AdjacencyType::index_type;
+  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
+  using weight_type        = AdjacencyType::weight_type;
+  using feature_vec_type   = SketchContainerType::mapped_type;
+  using feature_type       = feature_vec_type::value_type;
   static_assert(
       std::is_same<index_type, typename SketchContainerType::key_type>::value);
   static_assert(
       std::is_same<index_type, typename adjacency_elt_type::first_type>::value);
 
-  using single_sketch_type    = SingleSketchType;
-  using single_transform_type = typename single_sketch_type::transform_type;
-  using single_transform_ptr_type =
-      typename single_sketch_type::transform_ptr_type;
+  using single_sketch_type        = SingleSketchType;
+  using single_transform_type     = single_sketch_type::transform_type;
+  using single_transform_ptr_type = single_sketch_type::transform_ptr_type;
 
-  using double_sketch_type    = DoubleSketchType;
-  using double_transform_type = typename double_sketch_type::transform_type;
-  using double_transform_ptr_type =
-      typename double_sketch_type::transform_ptr_type;
+  using double_sketch_type        = DoubleSketchType;
+  using double_transform_type     = double_sketch_type::transform_type;
+  using double_transform_ptr_type = double_sketch_type::transform_ptr_type;
 
-  using final_double_sketch_type = FinalDoubleSketchType;
-  using final_double_transform_type =
-      typename final_double_sketch_type::transform_type;
+  using final_double_sketch_type    = FinalDoubleSketchType;
+  using final_double_transform_type = final_double_sketch_type::transform_type;
   using final_double_transform_ptr_type =
-      typename final_double_sketch_type::transform_ptr_type;
+      final_double_sketch_type::transform_ptr_type;
   using final_single_transform_type =
-      typename final_double_transform_type::col_transform_type;
+      final_double_transform_type::col_transform_type;
   using final_single_transform_ptr_type =
-      typename final_double_transform_type::col_transform_ptr_type;
+      final_double_transform_type::col_transform_ptr_type;
 
-  using matrix_type = typename double_sketch_type::registers_type;
+  using matrix_type = double_sketch_type::registers_type;
 
   static_assert(std::is_same<
                 single_transform_ptr_type,

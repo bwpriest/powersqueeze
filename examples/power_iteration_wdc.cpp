@@ -105,15 +105,15 @@ struct reader {
 template <typename HandlerType>
 struct truth {
   using handler_type       = HandlerType;
-  using parameters_type    = typename handler_type::parameters_type;
-  using index_type         = typename handler_type::index_type;
-  using index_vec_type     = typename handler_type::index_vec_type;
-  using cmty_type          = typename handler_type::cmty_type;
-  using weight_type        = typename handler_type::weight_type;
-  using adjacency_elt_type = typename handler_type::adjacency_elt_type;
-  using adjacency_vec_type = typename handler_type::adjacency_vec_type;
-  using adjacency_type     = typename handler_type::adjacency_type;
-  using truth_type         = typename handler_type::truth_type;
+  using parameters_type    = handler_type::parameters_type;
+  using index_type         = handler_type::index_type;
+  using index_vec_type     = handler_type::index_vec_type;
+  using cmty_type          = handler_type::cmty_type;
+  using weight_type        = handler_type::weight_type;
+  using adjacency_elt_type = handler_type::adjacency_elt_type;
+  using adjacency_vec_type = handler_type::adjacency_vec_type;
+  using adjacency_type     = handler_type::adjacency_type;
+  using truth_type         = handler_type::truth_type;
   using container_type     = truth_type;
   using reader_type        = reader<index_type, cmty_type>;
 

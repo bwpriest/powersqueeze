@@ -13,14 +13,14 @@ template <typename SketchType, typename AdjacencyType,
           typename SketchContainerType>
 void accumulate(AdjacencyType &adjacency, SketchContainerType &SAp1,
                 const std::uint64_t &random_seed) {
-  using index_type         = typename AdjacencyType::index_type;
-  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
-  using weight_type        = typename AdjacencyType::weight_type;
-  using feature_vec_type   = typename SketchContainerType::mapped_type;
+  using index_type         = AdjacencyType::index_type;
+  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
+  using weight_type        = AdjacencyType::weight_type;
+  using feature_vec_type   = SketchContainerType::mapped_type;
   using sketch_type        = SketchType;
-  using transform_type     = typename sketch_type::transform_type;
-  using transform_ptr_type = typename sketch_type::transform_ptr_type;
+  using transform_type     = sketch_type::transform_type;
+  using transform_ptr_type = sketch_type::transform_ptr_type;
 
   static_assert(
       std::is_same<index_type, typename SketchContainerType::key_type>::value);

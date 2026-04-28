@@ -68,8 +68,8 @@ class base_handler {
 template <typename AdjacencyType>
 struct base_adjacency_handler {
   using adjacency_type     = AdjacencyType;
-  using adjacency_elt_type = typename adjacency_type::adjacency_elt_type;
-  using adjacency_vec_type = typename adjacency_type::adjacency_vec_type;
+  using adjacency_elt_type = adjacency_type::adjacency_elt_type;
+  using adjacency_vec_type = adjacency_type::adjacency_vec_type;
 };
 
 template <typename TruthType>
@@ -115,7 +115,7 @@ class handler_with_truth
 
  public:
   using base_type       = detail::base_handler<ParametersType>;
-  using parameters_type = typename base_type::parameters_type;
+  using parameters_type = base_type::parameters_type;
   handler_with_truth(ygm::comm &comm, const parameters_type &params)
       : base_type(comm, params) {}
 };

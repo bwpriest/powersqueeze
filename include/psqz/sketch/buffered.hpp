@@ -10,12 +10,12 @@ namespace psqz::sketch::buffered {
 template <typename AdjacencyType, typename SketchContainerType>
 void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
           SketchContainerType &next_sketch, const int buffer_size_ = 1048576) {
-  using index_type         = typename AdjacencyType::index_type;
-  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
-  using weight_type        = typename AdjacencyType::weight_type;
-  using feature_vec_type   = typename SketchContainerType::mapped_type;
-  using feature_type       = typename feature_vec_type::value_type;
+  using index_type         = AdjacencyType::index_type;
+  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
+  using weight_type        = AdjacencyType::weight_type;
+  using feature_vec_type   = SketchContainerType::mapped_type;
+  using feature_type       = feature_vec_type::value_type;
   static_assert(
       std::is_same<index_type, typename SketchContainerType::key_type>());
   static_assert(

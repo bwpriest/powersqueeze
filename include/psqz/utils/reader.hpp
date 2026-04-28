@@ -21,8 +21,8 @@ void strip(std::string &str) {
 
 template <typename ContainerType>
 void read_truth_file(ContainerType &container, const fs::path &path) {
-  using index_type = typename ContainerType::key_type;
-  using cmty_type  = typename ContainerType::mapped_type;
+  using index_type = ContainerType::key_type;
+  using cmty_type  = ContainerType::mapped_type;
   if (!fs::exists(path)) {
     container.comm().cerr("truth file path ", path, " does not exist!");
     exit(1);
@@ -67,9 +67,9 @@ void read_truth(ContainerType &container, const fs::path &path) {
 template <typename ContainerType>
 void read_features_file(ContainerType &container, const int count,
                         const fs::path &path) {
-  using index_type       = typename ContainerType::key_type;
-  using feature_vec_type = typename ContainerType::mapped_type;
-  using feature_type     = typename feature_vec_type::value_type;
+  using index_type       = ContainerType::key_type;
+  using feature_vec_type = ContainerType::mapped_type;
+  using feature_type     = feature_vec_type::value_type;
 
   if (!fs::exists(path)) {
     container.comm().cout("feature file path ", path, " does not exist!");

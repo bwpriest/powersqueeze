@@ -85,10 +85,9 @@ struct dhnsw_only {
   using sketch_container_type = handler_type::sketch_container_type;
 
   using dhnsw_type = saltatlas::dhnsw<index_type, feature_vec_type, dist_type>;
-  using neighbor_type     = typename handler_type::neighbor_type;
-  using neighborhood_type = typename handler_type::neighborhood_type;
-  using neighborhood_container_type =
-      typename handler_type::neighborhood_container_type;
+  using neighbor_type               = handler_type::neighbor_type;
+  using neighborhood_type           = handler_type::neighborhood_type;
+  using neighborhood_container_type = handler_type::neighborhood_container_type;
 
   void operator()(ygm::comm &world, const parameters_type &params) const {
     // the `handler`is a convenience struct that holds all of the relevant
@@ -158,7 +157,7 @@ struct dhnsw_only {
     world.barrier();
     handler.chirp_metric("query populate time");
 
-    const std::vector<std::vector<typename dhnsw_type::neighbor_type>>
+    const std::vector<std::vector<dhnsw_type::neighbor_type>>
         query_neighborhoods = dhnsw.query(
             query_features.begin(), query_features.end(), params.nn_query());
     world.barrier();

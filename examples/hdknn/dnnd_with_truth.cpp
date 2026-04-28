@@ -90,11 +90,10 @@ struct dnnd_only {
   using sketch_container_type = handler_type::sketch_container_type;
 
   using dnnd_type = saltatlas::dnnd<index_type, feature_vec_type, dist_type>;
-  using neighbor_store_type = typename dnnd_type::neighbor_store_type;
-  using neighbor_type       = typename handler_type::neighbor_type;
-  using neighborhood_type   = typename handler_type::neighborhood_type;
-  using neighborhood_container_type =
-      typename handler_type::neighborhood_container_type;
+  using neighbor_store_type         = dnnd_type::neighbor_store_type;
+  using neighbor_type               = handler_type::neighbor_type;
+  using neighborhood_type           = handler_type::neighborhood_type;
+  using neighborhood_container_type = handler_type::neighborhood_container_type;
 
   void operator()(ygm::comm &world, const parameters_type &params) const {
     // the `handler`is a convenience struct that holds all of the relevant
@@ -187,11 +186,10 @@ struct dnnd_only {
     // indices to their neighbor's indices and distances.
     handler.reset_timer();
     neighborhood_container_type nbhd_map{world};
-    for (const std::pair<index_type,
-                         std::vector<typename dnnd_type::neighbor_type>>
+    for (const std::pair<index_type, std::vector<dnnd_type::neighbor_type>>
              &query_neighborhood : query_neighborhoods) {
       const index_type &query = query_neighborhood.first;
-      const std::vector<typename dnnd_type::neighbor_type> &neighborhood =
+      const std::vector<dnnd_type::neighbor_type> &neighborhood =
           query_neighborhood.second;
       nbhd_map.async_visit(
           query,
@@ -237,17 +235,15 @@ struct dnnd_only {
       static neighbor_store_type neighbor_store{query_indices.size()};
       static const int           nn_query = params.nn_query();
       world.barrier();
-      for (const std::pair<index_type,
-                           std::vector<typename dnnd_type::neighbor_type>>
+      for (const std::pair<index_type, std::vector<dnnd_type::neighbor_type>>
                &query_neighborhood : query_neighborhoods) {
         const index_type &query = query_neighborhood.first;
-        const std::vector<typename dnnd_type::neighbor_type> &neighborhood =
+        const std::vector<dnnd_type::neighbor_type> &neighborhood =
             query_neighborhood.second;
         query_orders.async_visit(
             query,
             [](const index_type &query, const index_type &order,
-               const std::vector<typename dnnd_type::neighbor_type>
-                   &neighborhood) {
+               const std::vector<dnnd_type::neighbor_type> &neighborhood) {
               for (int i{0}; i < neighborhood.size(); ++i) {
                 if (i >= nn_query) {
                   break;

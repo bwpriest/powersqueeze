@@ -14,10 +14,10 @@ namespace detail {
 template <typename HandlerType, template <typename> class ReaderType>
 struct community_streamer {
   using handler_type    = HandlerType;
-  using parameters_type = typename handler_type::parameters_type;
-  using index_type      = typename handler_type::index_type;
-  using weight_type     = typename handler_type::weight_type;
-  using truth_type      = typename handler_type::truth_type;
+  using parameters_type = handler_type::parameters_type;
+  using index_type      = handler_type::index_type;
+  using weight_type     = handler_type::weight_type;
+  using truth_type      = handler_type::truth_type;
   using edge_type       = edge<index_type, weight_type>;
   using reader_type     = ReaderType<edge_type>;
 
@@ -62,10 +62,10 @@ struct community_streamer {
 template <typename HandlerType, template <typename> class ReaderType>
 struct queries {
   using handler_type    = HandlerType;
-  using parameters_type = typename handler_type::parameters_type;
-  using query_type      = typename handler_type::query_type;
-  using index_type      = typename handler_type::index_type;
-  using weight_type     = typename handler_type::weight_type;
+  using parameters_type = handler_type::parameters_type;
+  using query_type      = handler_type::query_type;
+  using index_type      = handler_type::index_type;
+  using weight_type     = handler_type::weight_type;
   using edge_type       = edge<index_type, weight_type>;
   using reader_type     = ReaderType<edge_type>;
 
@@ -108,7 +108,7 @@ struct queries {
 template <typename HandlerType, template <typename> class CmtyStreamerFunc>
 struct truth_streamer {
   using handler_type = HandlerType;
-  using truth_type   = typename handler_type::truth_type;
+  using truth_type   = handler_type::truth_type;
 #if __has_include(<metall/metall.hpp>)
   using cmty_streamer_func = psqz::mtl::wrapper<CmtyStreamerFunc<handler_type>>;
 #else
@@ -127,7 +127,7 @@ struct truth_streamer {
 template <typename HandlerType, template <typename> class QueryFunc>
 struct queries {
   using handler_type = HandlerType;
-  using query_type   = typename handler_type::query_type;
+  using query_type   = handler_type::query_type;
   using query_func   = QueryFunc<handler_type>;
 
  protected:

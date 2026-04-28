@@ -28,16 +28,15 @@ namespace hdknn::metric {
 
 template <typename HandlerType>
 struct recall {
-  using handler_type      = HandlerType;
-  using index_type        = typename handler_type::index_type;
-  using cmty_type         = typename handler_type::cmty_type;
-  using parameters_type   = typename handler_type::parameters_type;
-  using truth_type        = typename handler_type::truth_type;
-  using query_type        = typename handler_type::query_type;
-  using neighbor_type     = typename handler_type::neighbor_type;
-  using neighborhood_type = typename handler_type::neighborhood_type;
-  using neighborhood_container_type =
-      typename handler_type::neighborhood_container_type;
+  using handler_type                = HandlerType;
+  using index_type                  = handler_type::index_type;
+  using cmty_type                   = handler_type::cmty_type;
+  using parameters_type             = handler_type::parameters_type;
+  using truth_type                  = handler_type::truth_type;
+  using query_type                  = handler_type::query_type;
+  using neighbor_type               = handler_type::neighbor_type;
+  using neighborhood_type           = handler_type::neighborhood_type;
+  using neighborhood_container_type = handler_type::neighborhood_container_type;
 
  private:
   handler_type          &_handler;

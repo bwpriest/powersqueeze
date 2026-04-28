@@ -18,9 +18,9 @@ namespace detail {
 template <typename HandlerType, template <typename> class ReaderType>
 struct edge_streamer {
   using handler_type    = HandlerType;
-  using parameters_type = typename handler_type::parameters_type;
-  using adjacency_type  = typename handler_type::adjacency_type;
-  using edge_type       = typename adjacency_type::edge_type;
+  using parameters_type = handler_type::parameters_type;
+  using adjacency_type  = handler_type::adjacency_type;
+  using edge_type       = adjacency_type::edge_type;
   using reader_type     = ReaderType<edge_type>;
 
  protected:
@@ -64,12 +64,12 @@ struct edge_streamer {
 template <typename HandlerType>
 struct adjacency_normalizer {
   using handler_type       = HandlerType;
-  using parameters_type    = typename handler_type::parameters_type;
-  using index_type         = typename handler_type::index_type;
-  using weight_type        = typename handler_type::weight_type;
-  using adjacency_elt_type = typename handler_type::adjacency_elt_type;
-  using adjacency_vec_type = typename handler_type::adjacency_vec_type;
-  using adjacency_type     = typename handler_type::adjacency_type;
+  using parameters_type    = handler_type::parameters_type;
+  using index_type         = handler_type::index_type;
+  using weight_type        = handler_type::weight_type;
+  using adjacency_elt_type = handler_type::adjacency_elt_type;
+  using adjacency_vec_type = handler_type::adjacency_vec_type;
+  using adjacency_type     = handler_type::adjacency_type;
 
  protected:
   handler_type          &_handler;
@@ -134,7 +134,7 @@ struct adjacency_normalizer {
 template <typename HandlerType, template <typename> class EdgeStreamerType>
 struct adjacency_streamer {
   using handler_type   = HandlerType;
-  using adjacency_type = typename handler_type::adjacency_type;
+  using adjacency_type = handler_type::adjacency_type;
 #if __has_include(<metall/metall.hpp>)
   using edge_streamer_func =
       psqz::mtl::vectorized_wrapper<EdgeStreamerType<handler_type>>;
@@ -155,13 +155,13 @@ template <typename HandlerType, template <typename> class EdgeStreamerType,
           template <typename> class AdjacencyNormalizerType>
 struct normalized_adjacency_streamer {
   using handler_type   = HandlerType;
-  using adjacency_type = typename handler_type::adjacency_type;
+  using adjacency_type = handler_type::adjacency_type;
 #if __has_include(<metall/metall.hpp>)
   using adjacency_func =
       psqz::mtl::vectorized_wrapper<EdgeStreamerType<handler_type>>;
   using normalize_func =
       psqz::mtl::vectorized_wrapper<AdjacencyNormalizerType<handler_type>>;
-  using mtl_map_type = typename adjacency_func::mtl_map_type;
+  using mtl_map_type = adjacency_func::mtl_map_type;
 #else
   using edge_streamer_func        = EdgeStreamerType<handler_type>;
   using adjacency_normalizer_func = AdjacencyNormalizerType<handler_type>;

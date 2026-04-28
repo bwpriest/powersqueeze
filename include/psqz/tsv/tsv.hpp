@@ -15,8 +15,8 @@ namespace psqz::tsv {
 
 template <typename EdgeType>
 inline bool try_read_edge(EdgeType &edge, std::ifstream &ifs) {
-  using index_type  = typename EdgeType::index_type;
-  using weight_type = typename EdgeType::weight_type;
+  using index_type  = EdgeType::index_type;
+  using weight_type = EdgeType::weight_type;
 
   std::string line;
   index_type  src;
@@ -49,7 +49,7 @@ inline bool try_read_edge(EdgeType &edge, std::ifstream &ifs) {
 template <typename EdgeType>
 inline bool try_read_index(EdgeType &edge, std::ifstream &ifs) {
   using edge_type  = EdgeType;
-  using index_type = typename edge_type::index_type;
+  using index_type = edge_type::index_type;
 
   std::string line;
   index_type  idx;

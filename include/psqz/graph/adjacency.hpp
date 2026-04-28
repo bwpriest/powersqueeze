@@ -32,9 +32,9 @@ template <typename OptionsType>
 struct adjacency_view {
   using options_type = OptionsType;
 
-  using index_type         = typename options_type::index_type;
-  using weight_type        = typename options_type::weight_type;
-  using index_vec_type     = typename options_type::index_vec_type;
+  using index_type         = options_type::index_type;
+  using weight_type        = options_type::weight_type;
+  using index_vec_type     = options_type::index_vec_type;
   using edge_type          = edge<index_type, weight_type>;
   using adjacency_elt_type = std::pair<index_type, weight_type>;
   using adjacency_vec_type =

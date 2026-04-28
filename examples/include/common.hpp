@@ -36,9 +36,9 @@ struct parameters : public ParametersType {
 template <typename HandlerType, typename SketchContainerType>
 void sketch_stats(HandlerType &handler, SketchContainerType &sketch_container,
                   const std::string name) {
-  using index_type       = typename SketchContainerType::key_type;
-  using feature_vec_type = typename SketchContainerType::mapped_type;
-  using feature_type     = typename feature_vec_type::value_type;
+  using index_type       = SketchContainerType::key_type;
+  using feature_vec_type = SketchContainerType::mapped_type;
+  using feature_type     = feature_vec_type::value_type;
 
   std::size_t nonzeros{0};
   std::size_t empties{0};
@@ -107,11 +107,11 @@ void sketch_accounting(HandlerType          &handler,
 template <typename HandlerType, typename AdjacencyType, typename TruthType>
 void adjacency_report(HandlerType &handler, AdjacencyType &adjacency,
                       TruthType &truth) {
-  using index_type         = typename AdjacencyType::index_type;
-  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
-  using weight_type        = typename AdjacencyType::weight_type;
-  using cmty_type          = typename TruthType::mapped_type;
+  using index_type         = AdjacencyType::index_type;
+  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
+  using weight_type        = AdjacencyType::weight_type;
+  using cmty_type          = TruthType::mapped_type;
   static_assert(std::is_same<index_type, typename TruthType::key_type>());
   static_assert(
       std::is_same<index_type, typename adjacency_elt_type::first_type>());
@@ -202,10 +202,10 @@ void adjacency_report(HandlerType &handler, AdjacencyType &adjacency,
 
 template <typename HandlerType, typename AdjacencyType>
 void adjacency_report(HandlerType &handler, AdjacencyType &adjacency) {
-  using index_type         = typename AdjacencyType::index_type;
-  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
-  using weight_type        = typename AdjacencyType::weight_type;
+  using index_type         = AdjacencyType::index_type;
+  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
+  using weight_type        = AdjacencyType::weight_type;
   static_assert(
       std::is_same<index_type, typename adjacency_elt_type::first_type>());
 

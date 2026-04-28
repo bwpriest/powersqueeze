@@ -21,7 +21,7 @@ template <typename HandlerType,
 struct edge_streamer : public BaseType<HandlerType, psqz::tsv::reader> {
   using handler_type = HandlerType;
   using base_type    = BaseType<handler_type, psqz::tsv::reader>;
-  using reader_type  = typename base_type::reader_type;
+  using reader_type  = base_type::reader_type;
 
  public:
   edge_streamer(handler_type &handler) : base_type(handler) {}
