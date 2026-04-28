@@ -5,8 +5,10 @@
 #include <psqz/graph/options.hpp>
 #include <psqz/handler.hpp>
 #include <psqz/sketch/accumulate.hpp>
+#include <psqz/sketch/buffered.hpp>
 #include <psqz/sketch/interleaved.hpp>
 #include <psqz/sketch/parameters.hpp>
+#include <psqz/sketch/preloaded.hpp>
 #include <psqz/tsv/graph.hpp>
 #include <psqz/tsv/truth.hpp>
 #include <psqz/utils/writer.hpp>
@@ -167,6 +169,24 @@ using parameters_type = example::parameters<psqz::sketch::tsv::parameters>;
 
 constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 
+template <typename HandlerType, typename SketchContainerType,
+          typename FeatureVecType, typename AdjacencyViewType>
+void do_iteration(HandlerType &handler, SketchContainerType &this_sketch,
+                  const FeatureVecType &dummy,
+                  AdjacencyViewType    &adjacency_view,
+                  const std::size_t vertex_count, const int exponent) {
+  SketchContainerType next_sketch(handler.comm(), vertex_count, dummy);
+  handler.reset_timer();
+  psqz::sketch::interleaved::spMV(adjacency_view, this_sketch, next_sketch);
+  // psqz::sketch::preloaded::spMV(adjacency_view, this_sketch,
+  //                               next_sketch);
+  // psqz::sketch::buffered::spMV(adjacency_view, this_sketch,
+  //                              next_sketch);
+  sketch_accounting(handler, next_sketch, handler.params(), exponent);
+  this_sketch.local_swap(next_sketch);
+  handler.chirp_metric(sketch_name(exponent) + " swap time");
+}
+
 // In this example we contain the workflow into the functor
 // `power_iteration_tsv` because it is a convenient way to instrument the
 // workflows for different compile-time sketch parameters, such as the
@@ -269,15 +289,25 @@ struct power_iteration_tsv {
     // Here we perform iterative sparse matrix-multivector multiplications to
     // accumulate sketches of the powers of the adjacency matrix, repeating up
     // to the desired target power.
+    // This workflow supports rectangular matrices, i.e. the incidence matrix of
+    // a hypergraph or a concise bipartite adjacency. Thus, if the adjacency
+    // abstraction is rectuangular the matrix exponent must be odd to compute
+    // $A^{2t + 1} \approx A (A^\top A)^t S$.
+    if (adjacency_type::rectangular() && params.exponent() & 1 == 0) {
+      std::stringstream ss;
+      ss << "adjacency type " << adjacency_type::name()
+         << " requires an odd exponent, not " << params.exponent();
+      throw std::logic_error(ss.str());
+    }
     int exponent{1};
     while (++exponent <= params.exponent()) {
-      sketch_container_type next_sketch(world, params.vertex_count(), dummy);
-      handler.reset_timer();
-      psqz::sketch::interleaved::spMV(adjacency.row_view(), this_sketch,
-                                      next_sketch);
-      sketch_accounting(handler, next_sketch, params, exponent);
-      this_sketch.local_swap(next_sketch);
-      handler.chirp_metric(sketch_name(exponent) + " swap time");
+      if (exponent & 1 == 0) {
+        do_iteration(handler, this_sketch, dummy, adjacency.col_view(),
+                     params.vertex_count(), exponent);
+      } else {
+        do_iteration(handler, this_sketch, dummy, adjacency.row_view(),
+                     params.vertex_count(), exponent);
+      }
     }
 
     handler.repeat_metrics();

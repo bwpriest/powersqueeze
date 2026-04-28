@@ -86,8 +86,13 @@ struct square_undirected_adjacency {
   ygm::comm &comm() { return _row_container.comm(); }
 
   row_container_type &row_container() { return _row_view.container(); }
+  row_container_type &col_container() { return _row_view.container(); }
 
   view_type &row_view() { return _row_view; }
+  view_type &col_view() { return _row_view; }
+
+  static constexpr std::string name() { return "square_undirected"; }
+  static constexpr bool        rectangular() { return false; }
 
   template <typename... Args>
   void async_insert_edge(const edge_type &edge, Args &...args) {
