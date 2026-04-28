@@ -7,13 +7,14 @@
 
 namespace psqz::sketch::interleaved {
 
-template <typename AdjacencyType, typename SketchContainerType>
-void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
+template <typename AdjacencyViewType, typename SketchContainerType>
+void spMV(AdjacencyViewType   &adjacency_view,
+          SketchContainerType &current_sketch,
           SketchContainerType &next_sketch) {
-  using index_type         = AdjacencyType::index_type;
-  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
-  using weight_type        = AdjacencyType::weight_type;
+  using index_type         = AdjacencyViewType::index_type;
+  using adjacency_vec_type = AdjacencyViewType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyViewType::adjacency_elt_type;
+  using weight_type        = AdjacencyViewType::weight_type;
   using feature_vec_type   = SketchContainerType::mapped_type;
   using feature_type       = feature_vec_type::value_type;
   static_assert(
@@ -23,27 +24,27 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
 
   auto next_sketch_ptr = next_sketch.get_ygm_ptr();
 
-  current_sketch.for_all(
-      [&adjacency, &next_sketch](const index_type       &col_idx,
-                                 const feature_vec_type &col_sketch) {
-        // This assumes that A and current_sketch share the same partitioning
-        // scheme.
-        auto adj_visitor = [&next_sketch](const index_type         &col_idx,
-                                          const adjacency_vec_type &col_adj,
-                                          const feature_vec_type &col_sketch) {
-          for (const adjacency_elt_type &row : col_adj) {
-            const index_type row_idx = row.first;
-            next_sketch.async_visit(
-                row_idx,
-                [](const index_type &row_idx, feature_vec_type &row_sketch,
-                   const feature_vec_type &col_sketch) {
-                  row_sketch += col_sketch;
-                },
-                col_sketch);
-          }
-        };
-        adjacency.row_container().local_visit(col_idx, adj_visitor, col_sketch);
-      });
+  current_sketch.for_all([&adjacency_view, &next_sketch](
+                             const index_type       &col_idx,
+                             const feature_vec_type &col_sketch) {
+    // This assumes that A and current_sketch share the same partitioning
+    // scheme.
+    auto adj_visitor = [&next_sketch](const index_type         &col_idx,
+                                      const adjacency_vec_type &col_adj,
+                                      const feature_vec_type   &col_sketch) {
+      for (const adjacency_elt_type &row : col_adj) {
+        const index_type row_idx = row.first;
+        next_sketch.async_visit(
+            row_idx,
+            [](const index_type &row_idx, feature_vec_type &row_sketch,
+               const feature_vec_type &col_sketch) {
+              row_sketch += col_sketch;
+            },
+            col_sketch);
+      }
+    };
+    adjacency_view.container().local_visit(col_idx, adj_visitor, col_sketch);
+  });
 
   current_sketch.comm().barrier();
 }

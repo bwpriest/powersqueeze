@@ -7,13 +7,14 @@
 
 namespace psqz::sketch::buffered {
 
-template <typename AdjacencyType, typename SketchContainerType>
-void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
-          SketchContainerType &next_sketch, const int buffer_size_ = 1048576) {
-  using index_type         = AdjacencyType::index_type;
-  using adjacency_vec_type = AdjacencyType::adjacency_vec_type;
-  using adjacency_elt_type = AdjacencyType::adjacency_elt_type;
-  using weight_type        = AdjacencyType::weight_type;
+template <typename AdjacencyViewType, typename SketchContainerType>
+void spMV(AdjacencyViewType   &adjacency_view,
+          SketchContainerType &current_sketch, SketchContainerType &next_sketch,
+          const int buffer_size_ = 1048576) {
+  using index_type         = AdjacencyViewType::index_type;
+  using adjacency_vec_type = AdjacencyViewType::adjacency_vec_type;
+  using adjacency_elt_type = AdjacencyViewType::adjacency_elt_type;
+  using weight_type        = AdjacencyViewType::weight_type;
   using feature_vec_type   = SketchContainerType::mapped_type;
   using feature_type       = feature_vec_type::value_type;
   static_assert(
@@ -26,7 +27,7 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
   static std::unordered_map<index_type, feature_vec_type> buffer;
 
   static int buffer_size = buffer_size_;
-  auto       kv_lambda   = [&adjacency, next_sketch_ptr](
+  auto       kv_lambda   = [&adjacency_view, next_sketch_ptr](
                        const index_type       &col_idx,
                        const feature_vec_type &col_sketch) {
     auto csc_visit_lambda =
@@ -52,13 +53,13 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
             buffer.clear();
           }
         };
-    adjacency.row_container().local_visit(col_idx, csc_visit_lambda, col_sketch,
-                                          next_sketch_ptr);
+    adjacency_view.container().local_visit(col_idx, csc_visit_lambda,
+                                           col_sketch, next_sketch_ptr);
   };
 
   current_sketch.for_all(kv_lambda);
 
-  adjacency.comm().barrier();
+  current_sketch.comm().barrier();
 
   for (const auto [row_idx, sum_sketch] : buffer) {
     next_sketch.async_visit(
@@ -68,9 +69,9 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
         sum_sketch);
   }
 
-  adjacency.comm().barrier();
+  current_sketch.comm().barrier();
 
   buffer.clear();
-  adjacency.comm().barrier();
+  current_sketch.comm().barrier();
 }
 }  // namespace psqz::sketch::buffered

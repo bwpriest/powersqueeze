@@ -151,7 +151,8 @@ struct power_iteration_kron {
     while (++exponent <= params.exponent()) {
       sketch_container_type next_sketch(world, params.vertex_count(), dummy);
       handler.reset_timer();
-      psqz::sketch::interleaved::spMV(adjacency, this_sketch, next_sketch);
+      psqz::sketch::interleaved::spMV(adjacency.row_view(), this_sketch,
+                                      next_sketch);
       sketch_accounting(handler, next_sketch, params, exponent);
       this_sketch.local_swap(next_sketch);
       handler.chirp_metric(sketch_name(exponent) + " swap time");

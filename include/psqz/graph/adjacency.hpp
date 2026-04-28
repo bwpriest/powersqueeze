@@ -87,6 +87,8 @@ struct square_undirected_adjacency {
 
   row_container_type &row_container() { return _row_view.container(); }
 
+  view_type &row_view() { return _row_view; }
+
   template <typename... Args>
   void async_insert_edge(const edge_type &edge, Args &...args) {
     _row_container.async_visit(edge.src, insert_lambda,
