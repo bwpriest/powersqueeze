@@ -12,32 +12,47 @@ namespace hdknn {
 
 namespace detail {
 
-template <typename BaseType, typename DistType>
-class base_knn_handler : public BaseType {
- public:
-  using base_type = BaseType;
-
-  using parameters_type = typename base_type::parameters_type;
-
-  using index_type = typename base_type::index_type;
-
+template <typename IndexType, typename DistType>
+struct base_knn_handler {
   using dist_type         = DistType;
-  using neighbor_type     = std::pair<index_type, dist_type>;
+  using neighbor_type     = std::pair<IndexType, dist_type>;
   using neighborhood_type = std::vector<neighbor_type>;
   using neighborhood_container_type =
-      ygm::container::map<index_type, neighborhood_type>;
-  using query_type = ygm::container::set<index_type>;
+      ygm::container::map<IndexType, neighborhood_type>;
+  using query_type = ygm::container::set<IndexType>;
+};
 
-  base_knn_handler(ygm::comm &comm, const parameters_type &params)
-      : base_type(comm, params) {}
+template <typename KnnHandlerType, typename OtherHandlerType>
+struct base_knn_handler_checker {
+  static_assert(
+      std::is_same<
+          typename KnnHandlerType::neighbor_type::first_type,
+          typename OtherHandlerType::sketch_container_type::key_type>::value);
 };
 }  // namespace detail
 
 template <typename ParametersType, typename AdjacencyType, typename TruthType,
           typename DistType = float>
-using handler_with_truth =
-    detail::base_knn_handler<psqz::detail::base_handler_with_truth<
-                                 ParametersType, AdjacencyType, TruthType>,
-                             DistType>;
+class handler_with_truth
+    : public psqz::detail::base_handler<ParametersType>,
+      public detail::base_knn_handler<typename AdjacencyType::index_type,
+                                      DistType>,
+      public psqz::detail::base_adjacency_handler<AdjacencyType>,
+      public psqz::detail::base_truth_handler<TruthType> {
+  psqz::detail::base_truth_handler_checker<
+      psqz::detail::base_truth_handler<TruthType>,
+      psqz::detail::base_adjacency_handler<AdjacencyType>>
+      truth_checker;
+  detail::base_knn_handler_checker<
+      detail::base_knn_handler<typename AdjacencyType::index_type, DistType>,
+      psqz::detail::base_adjacency_handler<AdjacencyType>>
+      knn_checker;
+
+ public:
+  using base_type       = psqz::detail::base_handler<ParametersType>;
+  using parameters_type = typename base_type::parameters_type;
+  handler_with_truth(ygm::comm &comm, const parameters_type &params)
+      : base_type(comm, params) {}
+};
 
 }  // namespace hdknn

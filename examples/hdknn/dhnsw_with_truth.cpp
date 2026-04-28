@@ -83,8 +83,6 @@ struct dhnsw_only {
   using feature_vec_type      = handler_type::feature_vec_type;
   using cmty_type             = handler_type::cmty_type;
   using dist_type             = handler_type::dist_type;
-  using adjacency_elt_type    = handler_type::adjacency_elt_type;
-  using adjacency_vec_type    = handler_type::adjacency_vec_type;
   using query_type            = handler_type::query_type;
   using sketch_container_type = handler_type::sketch_container_type;
 

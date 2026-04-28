@@ -17,26 +17,12 @@
 namespace psqz {
 
 namespace detail {
-template <typename ParametersType, typename AdjacencyType>
+template <typename ParametersType>
 class base_handler {
  public:
   using parameters_type = ParametersType;
-  using adjacency_type  = AdjacencyType;
   using metrics_type    = Metrics;
   using timer_type      = ygm::utility::timer;
-
-  using index_type         = typename adjacency_type::index_type;
-  using feature_type       = typename adjacency_type::weight_type;
-  using weight_type        = typename adjacency_type::weight_type;
-  using index_vec_type     = typename adjacency_type::index_vec_type;
-  using adjacency_elt_type = std::pair<index_type, weight_type>;
-  using adjacency_vec_type =
-      typename adjacency_type::vector_type<adjacency_elt_type>;
-
-  using feature_vec_type = Eigen::Vector<feature_type, Eigen::Dynamic>;
-
-  using sketch_container_type =
-      typename adjacency_type::container_type<index_type, feature_vec_type>;
 
  protected:
   ygm::comm             &_comm;
@@ -83,47 +69,76 @@ class base_handler {
   void reset_timer() { _timer.reset(); }
 };
 
-template <typename ParametersType, typename AdjacencyType, typename TruthType>
-class base_handler_with_truth
-    : public base_handler<ParametersType, AdjacencyType> {
- public:
-  using base_type       = detail::base_handler<ParametersType, AdjacencyType>;
-  using parameters_type = typename base_type::parameters_type;
-  using adjacency_type  = typename base_type::adjacency_type;
-  using truth_type      = TruthType;
+template <typename AdjacencyType>
+struct base_adjacency_handler {
+  using adjacency_type     = AdjacencyType;
+  using index_type         = typename adjacency_type::index_type;
+  using feature_type       = typename adjacency_type::weight_type;
+  using weight_type        = typename adjacency_type::weight_type;
+  using index_vec_type     = typename adjacency_type::index_vec_type;
+  using adjacency_elt_type = std::pair<index_type, weight_type>;
+  using adjacency_vec_type =
+      typename adjacency_type::vector_type<adjacency_elt_type>;
 
-  using cmty_type = truth_type::mapped_type;
+  using feature_vec_type = Eigen::Vector<feature_type, Eigen::Dynamic>;
 
-  static_assert(std::is_same<typename adjacency_type::index_type,
-                             typename truth_type::key_type>::value);
-  static_assert(std::is_same<typename adjacency_type::index_type,
-                             typename truth_type::mapped_type>::value);
-
-  base_handler_with_truth(ygm::comm &comm, const parameters_type &params)
-      : base_type(comm, params) {}
+  using sketch_container_type =
+      typename adjacency_type::container_type<index_type, feature_vec_type>;
 };
 
-template <typename SketchType, typename BaseType>
-class base_sketch_handler : public BaseType {
- public:
-  using base_type       = BaseType;
-  using parameters_type = typename base_type::parameters_type;
-  using sketch_type     = SketchType;
-
-  static_assert(std::is_same<typename base_type::feature_type,
-                             typename sketch_type::register_type>::value);
-  static_assert(std::is_same<typename base_type::feature_vec_type,
-                             typename sketch_type::registers_type>::value);
-
- public:
-  base_sketch_handler(ygm::comm &comm, const parameters_type &params)
-      : base_type(comm, params) {}
+template <typename TruthType>
+struct base_truth_handler {
+  using truth_type = TruthType;
+  using cmty_type  = truth_type::mapped_type;
 };
+
+template <typename SketchType>
+struct base_sketch_handler {
+  using sketch_type = SketchType;
+};
+
+template <typename TruthHandlerType, typename AdjacencyHandlerType>
+struct base_truth_handler_checker {
+  static_assert(
+      std::is_same<typename AdjacencyHandlerType::index_type,
+                   typename TruthHandlerType::truth_type::key_type>::value);
+  static_assert(
+      std::is_same<typename AdjacencyHandlerType::index_type,
+                   typename TruthHandlerType::truth_type::mapped_type>::value);
+};
+
+template <typename SketchHandlerType, typename AdjacencyHandlerType>
+struct base_sketch_handler_checker {
+  static_assert(std::is_same<
+                typename AdjacencyHandlerType::feature_type,
+                typename SketchHandlerType::sketch_type::register_type>::value);
+  static_assert(
+      std::is_same<
+          typename AdjacencyHandlerType::feature_vec_type,
+          typename SketchHandlerType::sketch_type::registers_type>::value);
+};
+
 }  // namespace detail
 
 template <typename SketchType, typename ParametersType, typename AdjacencyType,
           typename TruthType>
-using handler_with_truth = detail::base_sketch_handler<
-    SketchType,
-    detail::base_handler_with_truth<ParametersType, AdjacencyType, TruthType>>;
+class handler_with_truth : public detail::base_handler<ParametersType>,
+                           public detail::base_sketch_handler<SketchType>,
+                           public detail::base_adjacency_handler<AdjacencyType>,
+                           public detail::base_truth_handler<TruthType> {
+  detail::base_sketch_handler_checker<
+      detail::base_sketch_handler<SketchType>,
+      detail::base_adjacency_handler<AdjacencyType>>
+      sketch_checker;
+  detail::base_truth_handler_checker<
+      detail::base_truth_handler<TruthType>,
+      detail::base_adjacency_handler<AdjacencyType>>
+      truth_checker;
+
+ public:
+  using base_type       = detail::base_handler<ParametersType>;
+  using parameters_type = typename base_type::parameters_type;
+  handler_with_truth(ygm::comm &comm, const parameters_type &params)
+      : base_type(comm, params) {}
+};
 }  // namespace psqz
