@@ -179,10 +179,8 @@ struct dnnd_only {
 
     // now we perform the queries.
     handler.reset_timer();
-    const std::unordered_map<index_type,
-                             std::vector<typename dnnd_type::neighbor_type>>
-        query_neighborhoods =
-            dnnd.get_neighbors(query_indices.begin(), query_indices.end());
+    const auto query_neighborhoods =
+        dnnd.get_neighbors(query_indices.begin(), query_indices.end());
     world.barrier();
     handler.chirp_metric("query dnnd time");
 
