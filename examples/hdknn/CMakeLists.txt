@@ -13,5 +13,5 @@ function (add_hdknn_example example_name)
     )
 endfunction ()
 
-add_hdknn_example(dhnsw_only)
-add_hdknn_example(dnnd_only)
+add_hdknn_example(dhnsw_with_truth)
+add_hdknn_example(dnnd_with_truth)
