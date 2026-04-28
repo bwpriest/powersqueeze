@@ -17,6 +17,17 @@
 
 namespace psqz::graph {
 
+constexpr auto insert_lambda = [](const auto &idx, auto &adj, const auto &elt) {
+  adj.push_back(elt);
+};
+
+template <typename VecType>
+constexpr VecType get_default(const std::size_t vertex_count) {
+  VecType default_value{};
+  default_value.reserve(static_cast<std::size_t>(__builtin_clz(vertex_count)));
+  return default_value;
+};
+
 template <typename OptionsType>
 struct square_undirected_adjacency {
   using options_type = OptionsType;
@@ -37,27 +48,17 @@ struct square_undirected_adjacency {
  private:
   row_container_type _row_container;
 
-  static constexpr auto insert_lambda =
-      [](const index_type &row_idx, adjacency_vec_type &row_adj,
-         const adjacency_elt_type &elt) { row_adj.push_back(elt); };
-
-  static constexpr adjacency_vec_type _get_default(
-      const std::size_t vertex_count) {
-    adjacency_vec_type default_value{};
-    default_value.reserve(
-        static_cast<std::size_t>(__builtin_clz(vertex_count)));
-    return default_value;
-  };
-
  public:
   square_undirected_adjacency(ygm::comm &comm, std::size_t vertex_count)
       : _row_container(
             psqz::spawn<container_type, index_type, adjacency_vec_type>(
-                comm, _get_default(vertex_count), vertex_count)) {}
+                comm, get_default<adjacency_vec_type>(vertex_count),
+                vertex_count)) {}
 
   ygm::comm &comm() { return _row_container.comm(); }
 
-  std::size_t size() { return _row_container.size(); }
+  std::size_t row_count() { return _row_container.size(); }
+  std::size_t col_count() { return _row_container.size(); }
 
   template <typename... Args>
   void for_all_rows(Args &&...args) {
