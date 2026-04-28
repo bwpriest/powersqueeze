@@ -113,7 +113,7 @@ std::vector<typename DoubleSketchType::registers_type> accumulate_matrices(
 
   single_sketch_type col_sketch(single_transform_ptrs[0]);
 
-  adjacency.for_all_rows(
+  adjacency.row_container().for_all(
       [&col_sketch, &SAp1, &double_sketches, &final_double_sketch](
           const index_type &col_idx, const adjacency_vec_type &col_adj) {
         col_sketch.clear();

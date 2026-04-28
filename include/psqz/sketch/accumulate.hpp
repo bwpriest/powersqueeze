@@ -35,9 +35,9 @@ void accumulate(AdjacencyType &adjacency, SketchContainerType &SAp1,
       std::make_shared<transform_type>(random_seed));
   sketch_type col_sketch(transform_ptr);
 
-  adjacency.for_all_rows([&col_sketch, &SAp1](
-                             const index_type         &col_idx,
-                             const adjacency_vec_type &col_adj) {
+  adjacency.row_container().for_all([&col_sketch, &SAp1](
+                                        const index_type         &col_idx,
+                                        const adjacency_vec_type &col_adj) {
     col_sketch.clear();
     for (const adjacency_elt_type &row : col_adj) {
       const index_type  &row_idx = row.first;

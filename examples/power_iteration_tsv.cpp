@@ -8,8 +8,10 @@
 #include <psqz/graph/options.hpp>
 #include <psqz/handler.hpp>
 #include <psqz/sketch/accumulate.hpp>
+#include <psqz/sketch/buffered.hpp>
 #include <psqz/sketch/interleaved.hpp>
 #include <psqz/sketch/parameters.hpp>
+#include <psqz/sketch/preloaded.hpp>
 #include <psqz/tsv/graph.hpp>
 #include <psqz/tsv/truth.hpp>
 #include <psqz/utils/writer.hpp>
@@ -138,6 +140,8 @@ struct power_iteration_tsv {
       sketch_container_type next_sketch(world, params.vertex_count(), dummy);
       handler.reset_timer();
       psqz::sketch::interleaved::spMV(adjacency, this_sketch, next_sketch);
+      // psqz::sketch::preloaded::spMV(adjacency, this_sketch, next_sketch);
+      // psqz::sketch::buffered::spMV(adjacency, this_sketch, next_sketch);
       sketch_accounting(handler, next_sketch, params, exponent);
       this_sketch.local_swap(next_sketch);
       handler.chirp_metric(sketch_name(exponent) + " swap time");

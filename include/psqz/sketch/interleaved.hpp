@@ -42,7 +42,7 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
                 col_sketch);
           }
         };
-        adjacency.local_row_visit(col_idx, adj_visitor, col_sketch);
+        adjacency.row_container().local_visit(col_idx, adj_visitor, col_sketch);
       });
 
   current_sketch.comm().barrier();

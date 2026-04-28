@@ -60,15 +60,7 @@ struct square_undirected_adjacency {
   std::size_t row_count() { return _row_container.size(); }
   std::size_t col_count() { return _row_container.size(); }
 
-  template <typename... Args>
-  void for_all_rows(Args &&...args) {
-    _row_container.for_all(args...);
-  }
-
-  template <typename... Args>
-  void for_all_cols(Args &&...args) {
-    _row_container.for_all_cols(args...);
-  }
+  row_container_type &row_container() { return _row_container; }
 
   template <typename... Args>
   void async_insert_edge(const edge_type &edge, Args &...args) {
@@ -76,16 +68,6 @@ struct square_undirected_adjacency {
                                adjacency_elt_type{edge.dst, edge.wgt});
     _row_container.async_visit(edge.dst, insert_lambda,
                                adjacency_elt_type{edge.src, edge.wgt});
-  }
-
-  template <typename... Args>
-  void local_row_visit(const index_type idx, Args &&...args) {
-    _row_container.local_visit(idx, args...);
-  }
-
-  template <typename... Args>
-  void local_col_visit(const index_type idx, Args &&...args) {
-    _row_container.local_visit(idx, args...);
   }
 };
 }  // namespace psqz::graph

@@ -150,7 +150,7 @@ struct jaccard_tsv {
 
     // This is an ad-hoc solution where we append the size to the end of each
     // sketch vector in order to approximate the Jaccard index.
-    adjacency.for_all_rows(
+    adjacency.row_container().for_all(
         [&SAp1](const index_type &idx, const adjacency_vec_type &adj_vec) {
           SAp1.async_visit(
               idx,

@@ -10,10 +10,10 @@ namespace psqz::sketch::buffered {
 template <typename AdjacencyType, typename SketchContainerType>
 void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
           SketchContainerType &next_sketch, const int buffer_size_ = 1048576) {
-  using index_type         = typename AdjacencyType::key_type;
-  using adjacency_vec_type = typename AdjacencyType::mapped_type;
-  using adjacency_elt_type = typename adjacency_vec_type::value_type;
-  using weight_type        = typename adjacency_elt_type::second_type;
+  using index_type         = typename AdjacencyType::index_type;
+  using adjacency_vec_type = typename AdjacencyType::adjacency_vec_type;
+  using adjacency_elt_type = typename AdjacencyType::adjacency_elt_type;
+  using weight_type        = typename AdjacencyType::weight_type;
   using feature_vec_type   = typename SketchContainerType::mapped_type;
   using feature_type       = typename feature_vec_type::value_type;
   static_assert(
@@ -52,8 +52,8 @@ void spMV(AdjacencyType &adjacency, SketchContainerType &current_sketch,
             buffer.clear();
           }
         };
-    adjacency.async_visit(col_idx, csc_visit_lambda, col_sketch,
-                          next_sketch_ptr);
+    adjacency.row_container().local_visit(col_idx, csc_visit_lambda, col_sketch,
+                                          next_sketch_ptr);
   };
 
   current_sketch.for_all(kv_lambda);

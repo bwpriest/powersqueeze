@@ -122,7 +122,7 @@ void adjacency_report(HandlerType &handler, AdjacencyType &adjacency,
   static index_type inter_edge_count{0};
   std::size_t       edge_count{0};
   std::size_t       adj_empties{0};
-  adjacency.for_all_rows(
+  adjacency.row_container().for_all(
       [&truth, &edge_count, &adj_empties](const index_type         &col_idx,
                                           const adjacency_vec_type &col_adj) {
         edge_count += col_adj.size();
@@ -213,7 +213,7 @@ void adjacency_report(HandlerType &handler, AdjacencyType &adjacency) {
 
   std::size_t edge_count{0};
   std::size_t adj_empties{0};
-  adjacency.for_all_rows(
+  adjacency.row_container().for_all(
       [&edge_count, &adj_empties](const index_type         &col_idx,
                                   const adjacency_vec_type &col_adj) {
         edge_count += col_adj.size();
