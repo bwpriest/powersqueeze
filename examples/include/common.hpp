@@ -152,7 +152,7 @@ void adjacency_report(HandlerType &handler, AdjacencyType &adjacency,
       });
   world.barrier();
 
-  std::size_t vertices          = adjacency.row_count();
+  std::size_t vertices          = adjacency.row_container().size();
   std::size_t edges             = ygm::sum(edge_count, world);
   std::size_t intra_edges       = ygm::sum(intra_edge_count, world);
   std::size_t inter_edges       = ygm::sum(inter_edge_count, world);
@@ -223,7 +223,7 @@ void adjacency_report(HandlerType &handler, AdjacencyType &adjacency) {
       });
   world.barrier();
 
-  std::size_t vertices          = adjacency.row_count();
+  std::size_t vertices          = adjacency.row_container().size();
   std::size_t edges             = ygm::sum(edge_count, world);
   std::size_t adjacency_empties = ygm::sum(adj_empties, world);
 

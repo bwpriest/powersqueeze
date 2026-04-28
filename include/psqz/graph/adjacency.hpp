@@ -29,7 +29,7 @@ constexpr VecType get_default(const std::size_t vertex_count) {
 };
 
 template <typename OptionsType>
-struct square_undirected_adjacency {
+struct adjacency_view {
   using options_type = OptionsType;
 
   using index_type         = typename options_type::index_type;
@@ -46,21 +46,46 @@ struct square_undirected_adjacency {
   using row_container_type = container_type<index_type, adjacency_vec_type>;
 
  private:
+  row_container_type &_container;
+
+ public:
+  adjacency_view(row_container_type &container) : _container(container) {}
+
+  row_container_type &container() { return _container; }
+};
+
+template <typename OptionsType>
+struct square_undirected_adjacency {
+  using options_type = OptionsType;
+  using view_type    = adjacency_view<OptionsType>;
+
+  using index_type         = view_type::index_type;
+  using weight_type        = view_type::weight_type;
+  using index_vec_type     = view_type::index_vec_type;
+  using edge_type          = view_type::edge_type;
+  using adjacency_elt_type = view_type::adjacency_elt_type;
+  using adjacency_vec_type = view_type::adjacency_vec_type;
+
+  template <typename IndexT, typename VecT>
+  using container_type = typename options_type::container_type<IndexT, VecT>;
+
+  using row_container_type = view_type::row_container_type;
+
+ private:
   row_container_type _row_container;
+  view_type          _row_view;
 
  public:
   square_undirected_adjacency(ygm::comm &comm, std::size_t vertex_count)
       : _row_container(
             psqz::spawn<container_type, index_type, adjacency_vec_type>(
                 comm, get_default<adjacency_vec_type>(vertex_count),
-                vertex_count)) {}
+                vertex_count)),
+        _row_view(_row_container) {}
 
   ygm::comm &comm() { return _row_container.comm(); }
 
-  std::size_t row_count() { return _row_container.size(); }
-  std::size_t col_count() { return _row_container.size(); }
-
-  row_container_type &row_container() { return _row_container; }
+  row_container_type &row_container() { return _row_view.container(); }
 
   template <typename... Args>
   void async_insert_edge(const edge_type &edge, Args &...args) {
