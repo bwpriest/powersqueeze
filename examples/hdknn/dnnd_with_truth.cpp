@@ -7,7 +7,7 @@
 #include <hdknn/metrics/recall.hpp>
 #include <hdknn/metrics/search_depth.hpp>
 
-#include <psqz/graph/adjacency.hpp>
+#include <psqz/graph/options.hpp>
 #include <psqz/tsv/graph.hpp>
 #include <psqz/utils/reader.hpp>
 
@@ -70,13 +70,11 @@ constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 
 struct dnnd_only {
   using feature_type = float;
-  using adjacency_type =
-      psqz::graph::square_undirected_adjacency<psqz::ygm_map, std::vector,
-                                               std::size_t, float>;
-  using truth_type = ygm::container::map<std::size_t, std::size_t>;
-  using handler_type =
-      hdknn::handler_with_truth<parameters_type, adjacency_type, truth_type,
-                                float>;
+  using options_type =
+      psqz::graph::options<psqz::ygm_map, std::vector, std::size_t, float>;
+  using truth_type   = ygm::container::map<std::size_t, std::size_t>;
+  using handler_type = hdknn::handler_with_truth<options_type, parameters_type,
+                                                 truth_type, float>;
 
   using query_fn = psqz::tsv::queries<handler_type>;
 

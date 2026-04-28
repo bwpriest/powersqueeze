@@ -22,30 +22,27 @@ struct base_knn_handler {
   using query_type = ygm::container::set<IndexType>;
 };
 
-template <typename KnnHandlerType, typename OtherHandlerType>
+template <typename KnnHandlerType, typename OptionsType>
 struct base_knn_handler_checker {
-  static_assert(
-      std::is_same<
-          typename KnnHandlerType::neighbor_type::first_type,
-          typename OtherHandlerType::sketch_container_type::key_type>::value);
+  static_assert(std::is_same<typename KnnHandlerType::neighbor_type::first_type,
+                             typename OptionsType::index_type>::value);
 };
 }  // namespace detail
 
-template <typename ParametersType, typename AdjacencyType, typename TruthType,
+template <typename OptionsType, typename ParametersType, typename TruthType,
           typename DistType = float>
 class handler_with_truth
     : public psqz::detail::base_handler<ParametersType>,
-      public detail::base_knn_handler<typename AdjacencyType::index_type,
+      public OptionsType,
+      public detail::base_knn_handler<typename OptionsType::index_type,
                                       DistType>,
-      public psqz::detail::base_adjacency_handler<AdjacencyType>,
       public psqz::detail::base_truth_handler<TruthType> {
   psqz::detail::base_truth_handler_checker<
-      psqz::detail::base_truth_handler<TruthType>,
-      psqz::detail::base_adjacency_handler<AdjacencyType>>
+      psqz::detail::base_truth_handler<TruthType>, OptionsType>
       truth_checker;
   detail::base_knn_handler_checker<
-      detail::base_knn_handler<typename AdjacencyType::index_type, DistType>,
-      psqz::detail::base_adjacency_handler<AdjacencyType>>
+      detail::base_knn_handler<typename OptionsType::index_type, DistType>,
+      OptionsType>
       knn_checker;
 
  public:

@@ -8,10 +8,6 @@
 #include <ygm/comm.hpp>
 #include <ygm/utility/timer.hpp>
 
-#include <Eigen/Dense>
-
-#include <krowkee/cereal/eigen.hpp>
-
 #include <iomanip>
 
 namespace psqz {
@@ -72,18 +68,8 @@ class base_handler {
 template <typename AdjacencyType>
 struct base_adjacency_handler {
   using adjacency_type     = AdjacencyType;
-  using index_type         = typename adjacency_type::index_type;
-  using feature_type       = typename adjacency_type::weight_type;
-  using weight_type        = typename adjacency_type::weight_type;
-  using index_vec_type     = typename adjacency_type::index_vec_type;
-  using adjacency_elt_type = std::pair<index_type, weight_type>;
-  using adjacency_vec_type =
-      typename adjacency_type::vector_type<adjacency_elt_type>;
-
-  using feature_vec_type = Eigen::Vector<feature_type, Eigen::Dynamic>;
-
-  using sketch_container_type =
-      typename adjacency_type::container_type<index_type, feature_vec_type>;
+  using adjacency_elt_type = typename adjacency_type::adjacency_elt_type;
+  using adjacency_vec_type = typename adjacency_type::adjacency_vec_type;
 };
 
 template <typename TruthType>
@@ -97,42 +83,42 @@ struct base_sketch_handler {
   using sketch_type = SketchType;
 };
 
-template <typename TruthHandlerType, typename AdjacencyHandlerType>
+template <typename TruthHandlerType, typename OptionsType>
 struct base_truth_handler_checker {
   static_assert(
-      std::is_same<typename AdjacencyHandlerType::index_type,
+      std::is_same<typename OptionsType::index_type,
                    typename TruthHandlerType::truth_type::key_type>::value);
   static_assert(
-      std::is_same<typename AdjacencyHandlerType::index_type,
+      std::is_same<typename OptionsType::index_type,
                    typename TruthHandlerType::truth_type::mapped_type>::value);
 };
 
-template <typename SketchHandlerType, typename AdjacencyHandlerType>
+template <typename SketchHandlerType, typename OptionsType>
 struct base_sketch_handler_checker {
   static_assert(std::is_same<
-                typename AdjacencyHandlerType::feature_type,
+                typename OptionsType::feature_type,
                 typename SketchHandlerType::sketch_type::register_type>::value);
   static_assert(
       std::is_same<
-          typename AdjacencyHandlerType::feature_vec_type,
+          typename OptionsType::feature_vec_type,
           typename SketchHandlerType::sketch_type::registers_type>::value);
 };
 
 }  // namespace detail
 
-template <typename SketchType, typename ParametersType, typename AdjacencyType,
-          typename TruthType>
-class handler_with_truth : public detail::base_handler<ParametersType>,
-                           public detail::base_sketch_handler<SketchType>,
-                           public detail::base_adjacency_handler<AdjacencyType>,
-                           public detail::base_truth_handler<TruthType> {
-  detail::base_sketch_handler_checker<
-      detail::base_sketch_handler<SketchType>,
-      detail::base_adjacency_handler<AdjacencyType>>
+template <typename OptionsType, typename SketchType, typename ParametersType,
+          template <typename> class AdjacencyType, typename TruthType>
+class handler_with_truth
+    : public detail::base_handler<ParametersType>,
+      public OptionsType,
+      public detail::base_sketch_handler<SketchType>,
+      public detail::base_adjacency_handler<AdjacencyType<OptionsType>>,
+      public detail::base_truth_handler<TruthType> {
+  detail::base_sketch_handler_checker<detail::base_sketch_handler<SketchType>,
+                                      OptionsType>
       sketch_checker;
-  detail::base_truth_handler_checker<
-      detail::base_truth_handler<TruthType>,
-      detail::base_adjacency_handler<AdjacencyType>>
+  detail::base_truth_handler_checker<detail::base_truth_handler<TruthType>,
+                                     OptionsType>
       truth_checker;
 
  public:

@@ -5,6 +5,7 @@
 #define TSV_DECREMENT
 
 #include <psqz/graph/adjacency.hpp>
+#include <psqz/graph/options.hpp>
 #include <psqz/handler.hpp>
 #include <psqz/sketch/accumulate.hpp>
 #include <psqz/sketch/interleaved.hpp>
@@ -37,18 +38,21 @@ constexpr auto parse_cmd_line = psqz::parse_cmd_line<parameters_type>;
 template <std::size_t RangeSize, std::size_t ReplicationCount>
 struct power_iteration_tsv {
   using feature_type = float;
-  using adjacency_type =
-      psqz::graph::square_undirected_adjacency<psqz::ygm_array, std::vector,
-                                               std::size_t, float>;
+  using options_type =
+      psqz::graph::options<psqz::ygm_array, std::vector, std::size_t, float>;
   using truth_type = ygm::container::map<std::size_t, std::size_t>;
   using sketch_type =
       krowkee::sketch::SparseJLT<feature_type, RangeSize, ReplicationCount,
                                  std::shared_ptr>;
-  using handler_type = psqz::handler_with_truth<sketch_type, parameters_type,
-                                                adjacency_type, truth_type>;
+  using handler_type =
+      psqz::handler_with_truth<options_type, sketch_type, parameters_type,
+                               psqz::graph::square_undirected_adjacency,
+                               truth_type>;
 
   using adjacency_streamer_fn = psqz::tsv::adjacency_streamer<handler_type>;
   using truth_streamer_fn     = psqz::tsv::truth_streamer<handler_type>;
+
+  using adjacency_type = handler_type::adjacency_type;
 
   using index_type            = handler_type::index_type;
   using feature_vec_type      = handler_type::feature_vec_type;

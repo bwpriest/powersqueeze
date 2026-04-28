@@ -17,22 +17,20 @@
 
 namespace psqz::graph {
 
-template <template <typename, typename> class ContainerType = psqz::ygm_array,
-          template <typename> class VecType                 = std::vector,
-          typename IndexType = std::size_t, typename WeightType = float>
+template <typename OptionsType>
 struct square_undirected_adjacency {
-  template <typename T>
-  using vector_type = VecType<T>;
+  using options_type = OptionsType;
 
-  template <typename IndexT, typename VecT>
-  using container_type = ContainerType<IndexT, VecT>;
-
-  using index_type         = IndexType;
-  using weight_type        = WeightType;
-  using index_vec_type     = vector_type<index_type>;
+  using index_type         = typename options_type::index_type;
+  using weight_type        = typename options_type::weight_type;
+  using index_vec_type     = typename options_type::index_vec_type;
   using edge_type          = edge<index_type, weight_type>;
   using adjacency_elt_type = std::pair<index_type, weight_type>;
-  using adjacency_vec_type = vector_type<adjacency_elt_type>;
+  using adjacency_vec_type =
+      typename options_type::vector_type<adjacency_elt_type>;
+
+  template <typename IndexT, typename VecT>
+  using container_type = typename options_type::container_type<IndexT, VecT>;
 
   using row_container_type = container_type<index_type, adjacency_vec_type>;
 
