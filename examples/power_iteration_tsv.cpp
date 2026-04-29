@@ -33,9 +33,9 @@ template <typename HandlerType, typename SketchContainerType,
           typename FeatureVecType, typename AdjacencyViewType>
 void do_iteration(HandlerType &handler, SketchContainerType &this_sketch,
                   const FeatureVecType &dummy,
-                  AdjacencyViewType    &adjacency_view,
-                  const std::size_t vertex_count, const int exponent) {
-  SketchContainerType next_sketch(handler.comm(), vertex_count, dummy);
+                  AdjacencyViewType &adjacency_view, const int exponent) {
+  SketchContainerType next_sketch(handler.comm(), adjacency_view.length(),
+                                  dummy);
   handler.reset_timer();
   psqz::sketch::interleaved::spMV(adjacency_view, this_sketch, next_sketch);
   // psqz::sketch::preloaded::spMV(adjacency_view, this_sketch,
@@ -168,10 +168,10 @@ struct power_iteration_tsv {
     while (++exponent <= params.exponent()) {
       if (exponent & 1 == 0) {
         do_iteration(handler, this_sketch, dummy, adjacency.col_view(),
-                     params.vertex_count(), exponent);
+                     exponent);
       } else {
         do_iteration(handler, this_sketch, dummy, adjacency.row_view(),
-                     params.vertex_count(), exponent);
+                     exponent);
       }
     }
 

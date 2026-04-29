@@ -47,11 +47,20 @@ struct adjacency_view {
 
  private:
   row_container_type &_container;
+  std::size_t         _size;
+  std::size_t         _length;
 
  public:
-  adjacency_view(row_container_type &container) : _container(container) {}
+  adjacency_view(row_container_type &container, std::size_t size,
+                 std::size_t length)
+      : _container(container), _size(size), _length(length) {}
+  adjacency_view(row_container_type &container, std::size_t size)
+      : adjacency_view(container, size, size) {}
 
   row_container_type &container() { return _container; }
+
+  std::size_t size() const { return _size; }
+  std::size_t length() const { return _length; }
 };
 
 template <typename OptionsType>
@@ -76,12 +85,14 @@ struct square_undirected_adjacency {
   view_type          _row_view;
 
  public:
-  square_undirected_adjacency(ygm::comm &comm, std::size_t vertex_count)
+  square_undirected_adjacency(ygm::comm &comm, std::size_t row_count,
+                              std::size_t col_count)
       : _row_container(
             psqz::spawn<container_type, index_type, adjacency_vec_type>(
-                comm, get_default<adjacency_vec_type>(vertex_count),
-                vertex_count)),
-        _row_view(_row_container) {}
+                comm, get_default<adjacency_vec_type>(row_count), row_count)),
+        _row_view(_row_container, row_count) {}
+  square_undirected_adjacency(ygm::comm &comm, std::size_t row_count)
+      : square_undirected_adjacency(comm, row_count, row_count) {}
 
   ygm::comm &comm() { return _row_container.comm(); }
 
